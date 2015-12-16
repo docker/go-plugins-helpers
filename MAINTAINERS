@@ -1,0 +1,24 @@
+[Org.Maintainers]
+
+	people = [
+		"calavera",
+		"dave-tucker",
+		"runcom",
+	]
+
+[people]
+
+	[people.calavera]
+	Name = "David Calavera"
+	Email = "david.calavera@gmail.com"
+	GitHub = "calavera"
+
+	[people.dave-tucker]
+	Name = "Dave Tucker"
+	Email = "dt@docker.com"
+	GitHub = "dave-tucker"
+
+	[people.runcom]
+	Name = "Antonio Murdaca"
+	Email = "me@runcom.ninja"
+	GitHub = "runcom"
