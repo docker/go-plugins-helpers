@@ -7,17 +7,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/docker/docker/pkg/sockets"
+	"github.com/docker/go-connections/sockets"
 )
 
 const (
 	pluginSockDir = "/run/docker/plugins"
 )
 
-func newUnixListener(
-	pluginName string,
-	group string,
-) (net.Listener, string, error) {
+func NewUnixListener(pluginName string, group string) (net.Listener, string, error) {
 	path, err := fullSocketAddress(pluginName)
 	if err != nil {
 		return nil, "", err

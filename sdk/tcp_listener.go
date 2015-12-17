@@ -6,17 +6,14 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/docker/docker/pkg/sockets"
+	"github.com/docker/go-connections/sockets"
 )
 
 const (
 	pluginSpecDir = "/etc/docker/plugins"
 )
 
-func newTCPListener(
-	address string,
-	pluginName string,
-) (net.Listener, string, error) {
+func NewTCPListener(address string, pluginName string) (net.Listener, string, error) {
 	listener, err := sockets.NewTCPSocket(address, nil)
 	if err != nil {
 		return nil, "", err
