@@ -5,6 +5,7 @@ dependencies:
   post:
     # install golint
     - go get github.com/golang/lint/golint
+    - go get ./...
 
 test:
   pre:
