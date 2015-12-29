@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// DefaultContentTypeV1_1 is the default content type accepted and sent by the plugins.
 const DefaultContentTypeV1_1 = "application/vnd.docker.plugins.v1.1+json"
 
 // DecodeRequest decodes an http request into a given structure.

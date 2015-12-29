@@ -13,8 +13,10 @@ const (
 	resPath  = "/" + authorization.AuthZApiResponse
 )
 
+// Request is the structure that docker's requests are deserialized to.
 type Request authorization.Request
 
+// Response is the strucutre that the plugin's responses are serialized to.
 type Response authorization.Response
 
 // Plugin represent the interface a plugin must fulfill.
