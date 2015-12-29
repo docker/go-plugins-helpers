@@ -1,3 +1,7 @@
+machine:
+  environment:
+    IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+
 dependencies:
   pre:
     # setup ipv6
@@ -5,7 +9,10 @@ dependencies:
   post:
     # install golint
     - go get github.com/golang/lint/golint
-    - go get ./...
+  override:
+    - mkdir -p "$GOPATH/src/$IMPORT_PATH"
+    - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
+    - go get -d -u ./...
 
 test:
   pre:
@@ -13,6 +20,3 @@ test:
     - go vet ./...
     - test -z "$(golint ./... | tee /dev/stderr)"
     - test -z "$(gofmt -s -l . | tee /dev/stderr)"
-  override:
-    # force to run tests for the subdirectories
-    - go test ./...
