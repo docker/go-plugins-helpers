@@ -20,3 +20,5 @@ test:
     - go vet "$IMPORT_PATH/..."
     - test -z "$(golint $IMPORT_PATH/... | tee /dev/stderr)"
     - test -z "$(gofmt -s -l $IMPORT_PATH/... | tee /dev/stderr)"
+  override:
+    - go test "$IMPORT_PATH/..."
