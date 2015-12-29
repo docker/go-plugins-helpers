@@ -12,11 +12,11 @@ dependencies:
   override:
     - mkdir -p "$GOPATH/src/$IMPORT_PATH"
     - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
-    - go get -d -u ./...
+    - go get -d -u "$IMPORT_PATH/..."
 
 test:
   pre:
     # run analysis before tests
-    - go vet ./...
-    - test -z "$(golint ./... | tee /dev/stderr)"
-    - test -z "$(gofmt -s -l . | tee /dev/stderr)"
+    - go vet "$IMPORT_PATH/..."
+    - test -z "$(golint $IMPORT_PATH/... | tee /dev/stderr)"
+    - test -z "$(gofmt -s -l $IMPORT_PATH/... | tee /dev/stderr)"
