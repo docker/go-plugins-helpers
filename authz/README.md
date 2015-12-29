@@ -10,15 +10,15 @@ Go handler to create external authz extensions for Docker.
 
 This library is designed to be integrated in your program.
 
-1. Implement the `dkauthz.Plugin` interface.
-2. Initialize a `dkauthz.Handler` with your implementation.
-3. Call either `ServeTCP` or `ServeUnix` from the `dkauthz.Handler`.
+1. Implement the `authz.Plugin` interface.
+2. Initialize a `authz.Handler` with your implementation.
+3. Call either `ServeTCP` or `ServeUnix` from the `authz.Handler`.
 
 ### Example using TCP sockets:
 
 ```go
   p := MyAuthZPlugin{}
-  h := dkauthz.NewHandler(p)
+  h := authz.NewHandler(p)
   h.ServeTCP("test_plugin", ":8080")
 ```
 
@@ -26,7 +26,7 @@ This library is designed to be integrated in your program.
 
 ```go
   p := MyAuthZPlugin{}
-  h := dkauthz.NewHandler(p)
+  h := authz.NewHandler(p)
   h.ServeUnix("root", "test_plugin")
 ```
 
