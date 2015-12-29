@@ -14,7 +14,7 @@ const (
 	pluginSockDir = "/run/docker/plugins"
 )
 
-func NewUnixListener(pluginName string, group string) (net.Listener, string, error) {
+func newUnixListener(pluginName string, group string) (net.Listener, string, error) {
 	path, err := fullSocketAddress(pluginName)
 	if err != nil {
 		return nil, "", err
