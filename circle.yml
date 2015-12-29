@@ -12,3 +12,6 @@ test:
     - go vet ./...
     - test -z "$(golint ./... | tee /dev/stderr)"
     - test -z "$(gofmt -s -l . | tee /dev/stderr)"
+  override:
+    # force to run tests for the subdirectories
+    - go test ./...
