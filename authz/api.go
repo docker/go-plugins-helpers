@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/docker/docker/pkg/authorization"
-	"github.com/docker/go-plugins-sdk/sdk"
+	"github.com/docker/go-plugins-helpers/sdk"
 )
 
 const (

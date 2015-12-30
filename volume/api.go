@@ -3,7 +3,7 @@ package volume
 import (
 	"net/http"
 
-	"github.com/docker/go-plugins-sdk/sdk"
+	"github.com/docker/go-plugins-helpers/sdk"
 )
 
 const (
