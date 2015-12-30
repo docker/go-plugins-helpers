@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/go-plugins-sdk/sdk"
+	"github.com/docker/go-plugins-helpers/sdk"
 )
 
 type TestDriver struct {
