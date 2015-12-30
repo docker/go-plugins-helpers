@@ -1,6 +1,6 @@
-# go-plugins-sdk
+# go-plugins-helpers
 
-Package collection to extend Docker Engine in Go
+A collection of helper packages to extend Docker Engine in Go
 
  Plugin type | Documentation | Description
  ------------|---------------|--------------------------------------------------
