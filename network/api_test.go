@@ -119,7 +119,7 @@ func TestCreateNetworkSuccess(t *testing.T) {
 	body, err := ioutil.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusOK {
-		t.Fatal("Expected 200, got %d\n", response.StatusCode)
+		t.Fatalf("Expected 200, got %d\n", response.StatusCode)
 	}
 	if string(body) != "{}\n" {
 		t.Fatalf("Expected %s, got %s\n", "{}\n", string(body))
@@ -138,7 +138,7 @@ func TestCreateNetworkError(t *testing.T) {
 	body, err := ioutil.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusInternalServerError {
-		t.Fatal("Expected 500, got %d\n", response.StatusCode)
+		t.Fatalf("Expected 500, got %d\n", response.StatusCode)
 	}
 	if string(body) != "{\"Err\":\"I CAN HAZ ERRORZ\"}\n" {
 		t.Fatalf("Expected %s, got %s\n", "{\"Err\":\"I CAN HAZ ERRORZ\"}\n", string(body))
