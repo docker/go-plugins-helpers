@@ -9,8 +9,6 @@ import (
 	"testing"
 
 	"github.com/docker/go-plugins-sdk/sdk"
-
-	. "gopkg.in/check.v1"
 )
 
 type TestDriver struct {
@@ -69,51 +67,45 @@ func (e *ErrDriver) Leave(r *LeaveRequest) error {
 	return errors.New("I CAN HAZ ERRORZ")
 }
 
-// Hook up gocheck into the "go test" runner.
-func Test(t *testing.T) { TestingT(t) }
-
-type MySuite struct {
-	h1 *Handler
-	h2 *Handler
-}
-
-var _ = Suite(&MySuite{})
-
-func (s *MySuite) SetUpSuite(c *C) {
+func TestMain(m *testing.M) {
 	d := &TestDriver{}
-	s.h1 = NewHandler(d)
-	go s.h1.ServeTCP("test", ":8080")
+	h1 := NewHandler(d)
+	go h1.ServeTCP("test", ":8080")
 
 	e := &ErrDriver{}
-	s.h2 = NewHandler(e)
-	go s.h2.ServeTCP("err", ":8888")
+	h2 := NewHandler(e)
+	go h2.ServeTCP("err", ":8888")
+
+	m.Run()
 }
 
-func (s *MySuite) TestActivate(c *C) {
+func TestActivate(t *testing.T) {
 	response, err := http.Get("http://localhost:8080/Plugin.Activate")
 	if err != nil {
-		c.Fatal(err)
+		t.Fatal(err)
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 
-	c.Assert(string(body), Equals, manifest+"\n")
-
+	if string(body) != manifest+"\n" {
+		t.Fatalf("Expected %s, got %s\n", manifest+"\n", string(body))
+	}
 }
 
-func (s *MySuite) TestCapabilitiesExchange(c *C) {
+func TestCapabilitiesExchange(t *testing.T) {
 	response, err := http.Get("http://localhost:8080/NetworkDriver.GetCapabilities")
 	if err != nil {
-		c.Fatal(err)
+		t.Fatal(err)
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 
-	c.Assert(string(body), Equals, defaultScope+"\n")
-
+	if string(body) != defaultScope+"\n" {
+		t.Fatalf("Expected %s, got %s\n", defaultScope+"\n", string(body))
+	}
 }
 
-func (s *MySuite) TestCreateNetworkSuccess(c *C) {
+func TestCreateNetworkSuccess(t *testing.T) {
 	request := `{"NetworkID":"d76cfa51738e8a12c5eca71ee69e9d65010a4b48eaad74adab439be7e61b9aaf","Options":{"com.docker.network.generic":{}},"IPv4Data":[{"AddressSpace":"","Gateway":"172.18.0.1/16","Pool":"172.18.0.0/16"}],"IPv6Data":[]}`
 
 	response, err := http.Post("http://localhost:8080/NetworkDriver.CreateNetwork",
@@ -121,28 +113,34 @@ func (s *MySuite) TestCreateNetworkSuccess(c *C) {
 		strings.NewReader(request),
 	)
 	if err != nil {
-		c.Fatal(err)
+		t.Fatal(err)
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 
-	c.Assert(response.StatusCode, Equals, http.StatusOK)
-	c.Assert(string(body), Equals, "{}\n")
-
+	if response.StatusCode != http.StatusOK {
+		t.Fatal("Expected 200, got %d\n", response.StatusCode)
+	}
+	if string(body) != "{}\n" {
+		t.Fatalf("Expected %s, got %s\n", "{}\n", string(body))
+	}
 }
 
-func (s *MySuite) TestCreateNetworkError(c *C) {
+func TestCreateNetworkError(t *testing.T) {
 	request := `{"NetworkID":"d76cfa51738e8a12c5eca71ee69e9d65010a4b48eaad74adab439be7e61b9aaf","Options":{"com.docker.network.generic":    {}},"IPv4Data":[{"AddressSpace":"","Gateway":"172.18.0.1/16","Pool":"172.18.0.0/16"}],"IPv6Data":[]}`
 	response, err := http.Post("http://localhost:8888/NetworkDriver.CreateNetwork",
 		sdk.DefaultContentTypeV1_1,
 		strings.NewReader(request))
 	if err != nil {
-		c.Fatal(err)
+		t.Fatal(err)
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 
-	c.Assert(response.StatusCode, Equals, http.StatusInternalServerError)
-	c.Assert(string(body), Equals, `{"Err":"I CAN HAZ ERRORZ"}`+"\n")
-
+	if response.StatusCode != http.StatusInternalServerError {
+		t.Fatal("Expected 500, got %d\n", response.StatusCode)
+	}
+	if string(body) != "{\"Err\":\"I CAN HAZ ERRORZ\"}\n" {
+		t.Fatalf("Expected %s, got %s\n", "{\"Err\":\"I CAN HAZ ERRORZ\"}\n", string(body))
+	}
 }
