@@ -15,8 +15,8 @@ const (
 	capabilitiesPath         = "/IpamDriver.GetCapabilities"
 	defaultAddressSpacesPath = "/IpamDriver.GetDefaultAddressSpaces"
 
-	requestPoolPath = "/IpamDriver.RequestPool"
-	releasePoolPath = "/IpamDriver.ReleasePool"
+	requestPoolPath    = "/IpamDriver.RequestPool"
+	releasePoolPath    = "/IpamDriver.ReleasePool"
 	requestAddressPath = "/IpamDriver.RequestAddress"
 	releaseAddressPath = "/IpamDriver.ReleaseAddress"
 )
@@ -30,42 +30,42 @@ type Driver interface {
 
 // RequestPoolRequest is sent by the Daemon requesting an address pool
 type RequestPoolRequest struct {
-	AddressSpace	string
-	Pool			string
-	SubPool			string
-	Options			map[string]
-	V6				bool
+	AddressSpace string
+	Pool         string
+	SubPool      string
+	Options      map[string]string
+	V6           bool
 }
 
 // RequestPoolResponse is sent in response to RequestPoolRequest
-type RequestPoolResponse {
-	PoolID	string
-	Pool	string
-	Data	map[string]string
+type RequestPoolResponse struct {
+	PoolID string
+	Pool   string
+	Data   map[string]string
 }
 
 // ReleasePoolPoolRequest is sent by the Daemon requesting an address pool
 type ReleasePoolRequest struct {
-	PoolID	string
+	PoolID string
 }
 
 // RequestAddressRequest is sent by the Daemon requesting an address
 type RequestAddressRequest struct {
-	PoolID			string
-	Address			string
-	Options			map[string]string
+	PoolID  string
+	Address string
+	Options map[string]string
 }
 
 // RequestAddressResponse is sent in response to RequestAddressRequest
 type RequestAddressResponse struct {
-	Address			string
-	Data			map[string]
+	Address string
+	Data    map[string]string
 }
 
 // RequestAddressRequest is sent by the Daemon requesting an address
 type ReleaseAddressRequest struct {
-	PoolID			string
-	Address			string
+	PoolID  string
+	Address string
 }
 
 // ErrorResponse is a formatted error message that libnetwork can understand
