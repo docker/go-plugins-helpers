@@ -1,16 +1,13 @@
 package ipam
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/docker/go-plugins-helpers/sdk"
 )
 
 const (
-	manifest             = `{"Implements": ["IpamDriver"]}`
-	defaultRequiresMac   = `{"RequiresMACAddress": true}`
-	defaultAddressSpaces = `{"LocalDefaultAddressSpace": "defaultLocal", "GlobalDefaultAddressSpace": "defaultGlobal"}`
+	manifest = `{"Implements": ["IpamDriver"]}`
 
 	capabilitiesPath         = "/IpamDriver.GetCapabilities"
 	defaultAddressSpacesPath = "/IpamDriver.GetDefaultAddressSpaces"
@@ -23,9 +20,23 @@ const (
 
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
+	Capabilities() (*CapabilitiesResponse, error)
+	DefaultAddressSpaces() (*DefaultAddressSpacesResponse, error)
 	RequestPool(*RequestPoolRequest) (*RequestPoolResponse, error)
 	ReleasePool(*ReleasePoolRequest) error
-	RequestAddress(*RequestAddressPath) (*RequestAddressResponse, error)
+	RequestAddress(*RequestAddressRequest) (*RequestAddressResponse, error)
+	ReleaseAddress(*ReleaseAddressRequest) error
+}
+
+// CapabilitiesResponse is returned to the Daemon requesting capabilities of the driver
+type CapabilitiesResponse struct {
+	RequiresMacAddress bool
+}
+
+// DefaultAddressSpacesResponse is returned to the Daemon requesting the defualt address spaces
+type DefaultAddressSpacesResponse struct {
+	LocalDefaultAddressSpace  string
+	GlobalDefaultAddressSpace string
 }
 
 // RequestPoolRequest is sent by the Daemon requesting an address pool
@@ -93,11 +104,21 @@ func NewHandler(driver Driver) *Handler {
 
 func (h *Handler) initMux() {
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, defaultRequiresMac)
+		res, err := h.driver.Capabilities()
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+		}
+		sdk.EncodeResponse(w, res, "")
 	})
 
 	h.HandleFunc(defaultAddressSpacesPath, func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, defaultAddressSpaces)
+		res, err := h.driver.DefaultAddressSpaces()
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+		}
+		sdk.EncodeResponse(w, res, "")
 	})
 
 	h.HandleFunc(requestPoolPath, func(w http.ResponseWriter, r *http.Request) {
