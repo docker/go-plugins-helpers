@@ -17,12 +17,14 @@ const (
 
 	requestPoolPath = "/IpamDriver.RequestPool"
 	releasePoolPath = "/IpamDriver.ReleasePool"
+	requestAddressPath = "/IpamDriver.RequestAddress"
 )
 
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
 	RequestPool(*RequestPoolRequest) (*RequestPoolResponse, error)
 	ReleasePool(*ReleasePoolRequest) error
+	RequestAddress(*RequestAddressPath) (*RequestAddressResponse, error)
 }
 
 // RequestPoolRequest is sent by the Daemon requesting an address pool
@@ -30,7 +32,7 @@ type RequestPoolRequest struct {
 	AddressSpace	string
 	Pool			string
 	SubPool			string
-	Options			map[string]interface{}
+	Options			map[string]
 	V6				bool
 }
 
@@ -44,6 +46,19 @@ type RequestPoolResponse {
 // ReleasePoolPoolRequest is sent by the Daemon requesting an address pool
 type ReleasePoolRequest struct {
 	PoolID	string
+}
+
+// RequestAddressRequest is sent by the Daemon requesting an address
+type RequestAddressRequest struct {
+	PoolID			string
+	Address			string
+	Options			map[string]string
+}
+
+// RequestAddressResponse is sent in response to RequestAddressRequest
+type RequestAddressResponse struct {
+	Address			string
+	Data			map[string]
 }
 
 // ErrorResponse is a formatted error message that libnetwork can understand
@@ -105,5 +120,19 @@ func (h *Handler) initMux() {
 			return
 		}
 		sdk.EncodeResponse(w, make(map[string]string), "")
+	})
+
+	h.HandleFunc(requestAddressPath, func(w http.ResponseWriter, r *http.Request) {
+		req := &RequestAddressRequest{}
+		err := sdk.DecodeRequest(w, r, req)
+		if err != nil {
+			return
+		}
+		res, err := h.driver.RequestAddress(req)
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+		}
+		sdk.EncodeResponse(w, res, "")
 	})
 }
