@@ -1,7 +1,6 @@
 package network
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/docker/go-plugins-helpers/sdk"
@@ -10,6 +9,9 @@ import (
 const (
 	manifest     = `{"Implements": ["NetworkDriver"]}`
 	defaultScope = `{"Scope": "local"}`
+
+	LocalScope  = `local`
+	GlobalScope = `global`
 
 	capabilitiesPath   = "/NetworkDriver.GetCapabilities"
 	createNetworkPath  = "/NetworkDriver.CreateNetwork"
@@ -26,6 +28,7 @@ const (
 
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
+	GetCapabilities() (*CapabilitiesResponse, error)
 	CreateNetwork(*CreateNetworkRequest) error
 	DeleteNetwork(*DeleteNetworkRequest) error
 	CreateEndpoint(*CreateEndpointRequest) error
@@ -33,6 +36,11 @@ type Driver interface {
 	EndpointInfo(*InfoRequest) (*InfoResponse, error)
 	Join(*JoinRequest) (*JoinResponse, error)
 	Leave(*LeaveRequest) error
+}
+
+// CapabilitiesResponse returns whether or not this network is global or local
+type CapabilitiesResponse struct {
+	Scope	string
 }
 
 // CreateNetworkRequest is sent by the daemon when a network needs to be created
@@ -149,9 +157,19 @@ func NewHandler(driver Driver) *Handler {
 
 func (h *Handler) initMux() {
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, defaultScope)
+		res, err := h.driver.GetCapabilities()
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			return
+		}
+		if res == nil {
+			msg := "Network driver must implement GetCapabilities"
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			return
+		}
+		sdk.EncodeResponse(w, res, "")
 	})
-
 	h.HandleFunc(createNetworkPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &CreateNetworkRequest{}
 		err := sdk.DecodeRequest(w, r, req)

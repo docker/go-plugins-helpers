@@ -15,6 +15,10 @@ type TestDriver struct {
 	Driver
 }
 
+func (t *TestDriver) GetCapabilities() (*CapabilitiesResponse, error) {
+	return &CapabilitiesResponse{Scope:LocalScope}, nil
+}
+
 func (t *TestDriver) CreateNetwork(r *CreateNetworkRequest) error {
 	return nil
 }
@@ -41,6 +45,10 @@ func (t *TestDriver) Leave(r *LeaveRequest) error {
 
 type ErrDriver struct {
 	Driver
+}
+
+func (e *ErrDriver) GetCapabilities() (*CapabilitiesResponse, error) {
+	return nil, fmt.Errorf("I CAN HAZ ERRORZ")
 }
 
 func (e *ErrDriver) CreateNetwork(r *CreateNetworkRequest) error {
