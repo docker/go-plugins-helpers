@@ -1,7 +1,3 @@
-# Credits
-
-Inspired by David's awesome [dkvolume](https://github.com/calavera/dkvolume) and adapted for the authZ api.
-
 # Docker authz extension api.
 
 Go handler to create external authz extensions for Docker.
