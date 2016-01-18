@@ -10,7 +10,9 @@ const (
 	manifest     = `{"Implements": ["NetworkDriver"]}`
 	defaultScope = `{"Scope": "local"}`
 
-	LocalScope  = `local`
+	// LocalScope is the correct scope response for a local scope driver
+	LocalScope = `local`
+	// GlobalScope is the correct scope response for a global scope driver
 	GlobalScope = `global`
 
 	capabilitiesPath   = "/NetworkDriver.GetCapabilities"
@@ -40,7 +42,7 @@ type Driver interface {
 
 // CapabilitiesResponse returns whether or not this network is global or local
 type CapabilitiesResponse struct {
-	Scope	string
+	Scope string
 }
 
 // CreateNetworkRequest is sent by the daemon when a network needs to be created

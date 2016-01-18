@@ -10,8 +10,8 @@ dependencies:
     # install golint
     - go get github.com/golang/lint/golint
   override:
-    - mkdir -p "$GOPATH/src/$IMPORT_PATH"
-    - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
+    - mkdir -p "$(echo $GOPATH | cut -d ":" -f1)/src/$IMPORT_PATH"
+    - rsync -azC --delete ./ "$(echo $GOPATH | cut -d ":" -f1)/src/$IMPORT_PATH/"
     - go get -d -u "$IMPORT_PATH/..."
 
 test:
