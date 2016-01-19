@@ -27,8 +27,8 @@ func (t *TestDriver) DeleteNetwork(r *DeleteNetworkRequest) error {
 	return nil
 }
 
-func (t *TestDriver) CreateEndpoint(r *CreateEndpointRequest) error {
-	return nil
+func (t *TestDriver) CreateEndpoint(r *CreateEndpointRequest) (*CreateEndpointResponse, error) {
+	return &CreateEndpointResponse{}, nil
 }
 
 func (t *TestDriver) DeleteEndpoint(r *DeleteEndpointRequest) error {
@@ -59,8 +59,8 @@ func (e *ErrDriver) DeleteNetwork(r *DeleteNetworkRequest) error {
 	return errors.New("I CAN HAZ ERRORZ")
 }
 
-func (e *ErrDriver) CreateEndpoint(r *CreateEndpointRequest) error {
-	return errors.New("I CAN HAZ ERRORZ")
+func (e *ErrDriver) CreateEndpoint(r *CreateEndpointRequest) (*CreateEndpointResponse, error) {
+	return nil, errors.New("I CAN HAZ ERRORZ")
 }
 
 func (e *ErrDriver) DeleteEndpoint(r *DeleteEndpointRequest) error {
