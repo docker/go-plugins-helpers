@@ -43,6 +43,14 @@ func (t *TestDriver) Leave(r *LeaveRequest) error {
 	return nil
 }
 
+func (t *TestDriver) DiscoverNew(r *DiscoverNewRequest) error {
+	return nil
+}
+
+func (t *TestDriver) DiscoverDelete(r *DiscoverDeleteRequest) error {
+	return nil
+}
+
 type ErrDriver struct {
 	Driver
 }
@@ -72,6 +80,14 @@ func (e *ErrDriver) Join(r *JoinRequest) (*JoinResponse, error) {
 }
 
 func (e *ErrDriver) Leave(r *LeaveRequest) error {
+	return errors.New("I CAN HAZ ERRORZ")
+}
+
+func (e *ErrDriver) DiscoverNew(r *DiscoverNewRequest) error {
+	return errors.New("I CAN HAZ ERRORZ")
+}
+
+func (e *ErrDriver) DiscoverDelete(r *DiscoverDeleteRequest) error {
 	return errors.New("I CAN HAZ ERRORZ")
 }
 

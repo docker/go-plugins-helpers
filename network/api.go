@@ -23,12 +23,10 @@ const (
 	deleteEndpointPath = "/NetworkDriver.DeleteEndpoint"
 	joinPath           = "/NetworkDriver.Join"
 	leavePath          = "/NetworkDriver.Leave"
-	//discoverNewPath    = "/NetworkDriver.DiscoverNew"
-	//discoverDeletePath = "/NetworkDriver.DiscoverDelete"
-
+	discoverNewPath    = "/NetworkDriver.DiscoverNew"
+	discoverDeletePath = "/NetworkDriver.DiscoverDelete"
 )
 
-// Driver represent the interface a driver must fulfill.
 type Driver interface {
 	GetCapabilities() (*CapabilitiesResponse, error)
 	CreateNetwork(*CreateNetworkRequest) error
@@ -38,6 +36,8 @@ type Driver interface {
 	EndpointInfo(*InfoRequest) (*InfoResponse, error)
 	Join(*JoinRequest) (*JoinResponse, error)
 	Leave(*LeaveRequest) error
+	DiscoverNew(*DiscoverNewRequest) error
+	DiscoverDelete(*DiscoverDeleteRequest) error
 }
 
 // CapabilitiesResponse returns whether or not this network is global or local
@@ -132,6 +132,18 @@ type LeaveRequest struct {
 	NetworkID  string
 	EndpointID string
 	Options    map[string]interface{}
+}
+
+// DiscoverNew is a notification for a new discovery event, Example:a new node joining a cluster
+type DiscoverNewRequest struct {
+	discoverType int
+	data         interface{}
+}
+
+// DiscoverDelete is a notification for a discovery delete event, Example:a node leaving a cluster
+type DiscoverDeleteRequest struct {
+	discoverType int
+	data         interface{}
 }
 
 // ErrorResponse is a formatted error message that libnetwork can understand
@@ -268,5 +280,32 @@ func (h *Handler) initMux() {
 		}
 		sdk.EncodeResponse(w, make(map[string]string), "")
 	})
-
+	h.HandleFunc(discoverNewPath, func(w http.ResponseWriter, r *http.Request) {
+		req := &DiscoverNewRequest{}
+		err := sdk.DecodeRequest(w, r, req)
+		if err != nil {
+			return
+		}
+		err = h.driver.DiscoverNew(req)
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			return
+		}
+		sdk.EncodeResponse(w, make(map[string]string), "")
+	})
+	h.HandleFunc(discoverDeletePath, func(w http.ResponseWriter, r *http.Request) {
+		req := &DiscoverDeleteRequest{}
+		err := sdk.DecodeRequest(w, r, req)
+		if err != nil {
+			return
+		}
+		err = h.driver.DiscoverDelete(req)
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			return
+		}
+		sdk.EncodeResponse(w, make(map[string]string), "")
+	})
 }
