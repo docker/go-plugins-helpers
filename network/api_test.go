@@ -43,11 +43,11 @@ func (t *TestDriver) Leave(r *LeaveRequest) error {
 	return nil
 }
 
-func (t *TestDriver) DiscoverNew(r *DiscoverNewRequest) error {
+func (t *TestDriver) DiscoverNew(r *DiscoverRequest) error {
 	return nil
 }
 
-func (t *TestDriver) DiscoverDelete(r *DiscoverDeleteRequest) error {
+func (t *TestDriver) DiscoverDelete(r *DiscoverRequest) error {
 	return nil
 }
 
@@ -83,11 +83,11 @@ func (e *ErrDriver) Leave(r *LeaveRequest) error {
 	return errors.New("I CAN HAZ ERRORZ")
 }
 
-func (e *ErrDriver) DiscoverNew(r *DiscoverNewRequest) error {
+func (e *ErrDriver) DiscoverNew(r *DiscoverRequest) error {
 	return errors.New("I CAN HAZ ERRORZ")
 }
 
-func (e *ErrDriver) DiscoverDelete(r *DiscoverDeleteRequest) error {
+func (e *ErrDriver) DiscoverDelete(r *DiscoverRequest) error {
 	return errors.New("I CAN HAZ ERRORZ")
 }
 

@@ -27,6 +27,7 @@ const (
 	discoverDeletePath = "/NetworkDriver.DiscoverDelete"
 )
 
+// Driver represent the interface a driver must fulfill.
 type Driver interface {
 	GetCapabilities() (*CapabilitiesResponse, error)
 	CreateNetwork(*CreateNetworkRequest) error
@@ -36,8 +37,8 @@ type Driver interface {
 	EndpointInfo(*InfoRequest) (*InfoResponse, error)
 	Join(*JoinRequest) (*JoinResponse, error)
 	Leave(*LeaveRequest) error
-	DiscoverNew(*DiscoverNewRequest) error
-	DiscoverDelete(*DiscoverDeleteRequest) error
+	DiscoverNew(*DiscoverRequest) error
+	DiscoverDelete(*DiscoverRequest) error
 }
 
 // CapabilitiesResponse returns whether or not this network is global or local
@@ -134,17 +135,20 @@ type LeaveRequest struct {
 	Options    map[string]interface{}
 }
 
-// DiscoverNew is a notification for a new discovery event, Example:a new node joining a cluster
-type DiscoverNewRequest struct {
-	discoverType int
-	data         interface{}
+// DiscoverRequest is a notification for a new discovery event, Example:a new node joining a cluster
+type DiscoverRequest struct {
+	DiscoveryType DiscoveryType
+	DiscoveryData DiscoveryData
 }
 
-// DiscoverDelete is a notification for a discovery delete event, Example:a node leaving a cluster
-type DiscoverDeleteRequest struct {
-	discoverType int
-	data         interface{}
-}
+type DiscoveryType int
+
+const (
+	// NodeDiscovery represents Node join/leave events provided by discovery
+	NodeDiscovery = iota + 1
+)
+
+type DiscoveryData interface{}
 
 // ErrorResponse is a formatted error message that libnetwork can understand
 type ErrorResponse struct {
@@ -281,7 +285,7 @@ func (h *Handler) initMux() {
 		sdk.EncodeResponse(w, make(map[string]string), "")
 	})
 	h.HandleFunc(discoverNewPath, func(w http.ResponseWriter, r *http.Request) {
-		req := &DiscoverNewRequest{}
+		req := &DiscoverRequest{}
 		err := sdk.DecodeRequest(w, r, req)
 		if err != nil {
 			return
@@ -295,7 +299,7 @@ func (h *Handler) initMux() {
 		sdk.EncodeResponse(w, make(map[string]string), "")
 	})
 	h.HandleFunc(discoverDeletePath, func(w http.ResponseWriter, r *http.Request) {
-		req := &DiscoverDeleteRequest{}
+		req := &DiscoverRequest{}
 		err := sdk.DecodeRequest(w, r, req)
 		if err != nil {
 			return
