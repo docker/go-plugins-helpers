@@ -12,7 +12,9 @@ const (
 
 	manifest        = `{"Implements": ["VolumeDriver"]}`
 	createPath      = "/VolumeDriver.Create"
-	remotePath      = "/VolumeDriver.Remove"
+	getPath         = "/VolumeDriver.Get"
+	listPath        = "/VolumeDriver.List"
+	removePath      = "/VolumeDriver.Remove"
 	hostVirtualPath = "/VolumeDriver.Path"
 	mountPath       = "/VolumeDriver.Mount"
 	unmountPath     = "/VolumeDriver.Unmount"
@@ -28,11 +30,21 @@ type Request struct {
 type Response struct {
 	Mountpoint string
 	Err        string
+	Volumes    []*Volume
+	Volume     *Volume
+}
+
+// Volume represents a volume object for use with `Get` and `List` requests
+type Volume struct {
+	Name       string
+	Mountpoint string
 }
 
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
 	Create(Request) Response
+	List(Request) Response
+	Get(Request) Response
 	Remove(Request) Response
 	Path(Request) Response
 	Mount(Request) Response
@@ -59,7 +71,15 @@ func (h *Handler) initMux() {
 		return h.driver.Create(req)
 	})
 
-	h.handle(remotePath, func(req Request) Response {
+	h.handle(getPath, func(req Request) Response {
+		return h.driver.Get(req)
+	})
+
+	h.handle(listPath, func(req Request) Response {
+		return h.driver.List(req)
+	})
+
+	h.handle(removePath, func(req Request) Response {
 		return h.driver.Remove(req)
 	})
 
