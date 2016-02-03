@@ -96,8 +96,8 @@ type InterfaceName struct {
 
 // InfoRequest is send by the daemon when querying endpoint information
 type InfoRequest struct {
-	NetworkID string
-	EnpointID string
+	NetworkID  string
+	EndpointID string
 }
 
 // InfoResponse is endpoint information sent in response to an InfoRequest
