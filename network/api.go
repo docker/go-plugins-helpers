@@ -7,9 +7,7 @@ import (
 )
 
 const (
-	manifest     = `{"Implements": ["NetworkDriver"]}`
-	defaultScope = `{"Scope": "local"}`
-
+	manifest = `{"Implements": ["NetworkDriver"]}`
 	// LocalScope is the correct scope response for a local scope driver
 	LocalScope = `local`
 	// GlobalScope is the correct scope response for a global scope driver
