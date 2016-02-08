@@ -1,4 +1,4 @@
-package authz
+package authorization
 
 import (
 	"net/http"
