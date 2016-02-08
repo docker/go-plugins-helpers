@@ -1,6 +1,7 @@
 package network
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/docker/go-plugins-helpers/sdk"
@@ -8,7 +9,7 @@ import (
 
 const (
 	manifest     = `{"Implements": ["NetworkDriver"]}`
-	defaultScope = `{"Scope": "local"}`
+	defaultScope = `{"Scope":"local"}`
 
 	// LocalScope is the correct scope response for a local scope driver
 	LocalScope = `local`
@@ -23,9 +24,8 @@ const (
 	deleteEndpointPath = "/NetworkDriver.DeleteEndpoint"
 	joinPath           = "/NetworkDriver.Join"
 	leavePath          = "/NetworkDriver.Leave"
-	//discoverNewPath    = "/NetworkDriver.DiscoverNew"
-	//discoverDeletePath = "/NetworkDriver.DiscoverDelete"
-
+	discoverNewPath    = "/NetworkDriver.DiscoverNew"
+	discoverDeletePath = "/NetworkDriver.DiscoverDelete"
 )
 
 // Driver represent the interface a driver must fulfill.
@@ -33,11 +33,13 @@ type Driver interface {
 	GetCapabilities() (*CapabilitiesResponse, error)
 	CreateNetwork(*CreateNetworkRequest) error
 	DeleteNetwork(*DeleteNetworkRequest) error
-	CreateEndpoint(*CreateEndpointRequest) error
+	CreateEndpoint(*CreateEndpointRequest) (*CreateEndpointResponse, error)
 	DeleteEndpoint(*DeleteEndpointRequest) error
 	EndpointInfo(*InfoRequest) (*InfoResponse, error)
 	Join(*JoinRequest) (*JoinResponse, error)
 	Leave(*LeaveRequest) error
+	DiscoverNew(*DiscoveryNotification) error
+	DiscoverDelete(*DiscoveryNotification) error
 }
 
 // CapabilitiesResponse returns whether or not this network is global or local
@@ -72,6 +74,10 @@ type CreateEndpointRequest struct {
 	EndpointID string
 	Interface  *EndpointInterface
 	Options    map[string]interface{}
+}
+
+type CreateEndpointResponse struct {
+	Interface *EndpointInterface
 }
 
 // EndpointInterface contains endpoint interface information
@@ -139,6 +145,11 @@ type ErrorResponse struct {
 	Err string
 }
 
+type DiscoveryNotification struct {
+	DiscoveryType int
+	DiscoveryData interface{}
+}
+
 // NewErrorResponse creates an ErrorResponse with the provided message
 func NewErrorResponse(msg string) *ErrorResponse {
 	return &ErrorResponse{Err: msg}
@@ -173,6 +184,7 @@ func (h *Handler) initMux() {
 		sdk.EncodeResponse(w, res, "")
 	})
 	h.HandleFunc(createNetworkPath, func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Entering go-plugins-helpers createnetwork")
 		req := &CreateNetworkRequest{}
 		err := sdk.DecodeRequest(w, r, req)
 		if err != nil {
@@ -206,13 +218,12 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.CreateEndpoint(req)
+		res, err := h.driver.CreateEndpoint(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
-			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, res, "")
 	})
 	h.HandleFunc(deleteEndpointPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &DeleteEndpointRequest{}
@@ -268,5 +279,32 @@ func (h *Handler) initMux() {
 		}
 		sdk.EncodeResponse(w, make(map[string]string), "")
 	})
-
+	h.HandleFunc(discoverNewPath, func(w http.ResponseWriter, r *http.Request) {
+		req := &DiscoveryNotification{}
+		err := sdk.DecodeRequest(w, r, req)
+		if err != nil {
+			return
+		}
+		err = h.driver.DiscoverNew(req)
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			return
+		}
+		sdk.EncodeResponse(w, make(map[string]string), "")
+	})
+	h.HandleFunc(discoverDeletePath, func(w http.ResponseWriter, r *http.Request) {
+		req := &DiscoveryNotification{}
+		err := sdk.DecodeRequest(w, r, req)
+		if err != nil {
+			return
+		}
+		err = h.driver.DiscoverDelete(req)
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			return
+		}
+		sdk.EncodeResponse(w, make(map[string]string), "")
+	})
 }
