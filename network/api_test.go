@@ -78,17 +78,17 @@ func (e *ErrDriver) Leave(r *LeaveRequest) error {
 func TestMain(m *testing.M) {
 	d := &TestDriver{}
 	h1 := NewHandler(d)
-	go h1.ServeTCP("test", ":328234")
+	go h1.ServeTCP("test", ":32234")
 
 	e := &ErrDriver{}
 	h2 := NewHandler(e)
-	go h2.ServeTCP("err", ":328567")
+	go h2.ServeTCP("err", ":32567")
 
 	m.Run()
 }
 
 func TestActivate(t *testing.T) {
-	response, err := http.Get("http://localhost:328234/Plugin.Activate")
+	response, err := http.Get("http://localhost:32234/Plugin.Activate")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,22 +101,23 @@ func TestActivate(t *testing.T) {
 }
 
 func TestCapabilitiesExchange(t *testing.T) {
-	response, err := http.Get("http://localhost:328234/NetworkDriver.GetCapabilities")
+	response, err := http.Get("http://localhost:32234/NetworkDriver.GetCapabilities")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 
-	if string(body) != defaultScope+"\n" {
-		t.Fatalf("Expected %s, got %s\n", defaultScope+"\n", string(body))
+	expected := `{"Scope":"local"}`
+	if string(body) != expected+"\n" {
+		t.Fatalf("Expected %s, got %s\n", expected+"\n", string(body))
 	}
 }
 
 func TestCreateNetworkSuccess(t *testing.T) {
 	request := `{"NetworkID":"d76cfa51738e8a12c5eca71ee69e9d65010a4b48eaad74adab439be7e61b9aaf","Options":{"com.docker.network.generic":{}},"IPv4Data":[{"AddressSpace":"","Gateway":"172.18.0.1/16","Pool":"172.18.0.0/16"}],"IPv6Data":[]}`
 
-	response, err := http.Post("http://localhost:328234/NetworkDriver.CreateNetwork",
+	response, err := http.Post("http://localhost:32234/NetworkDriver.CreateNetwork",
 		sdk.DefaultContentTypeV1_1,
 		strings.NewReader(request),
 	)
@@ -136,7 +137,7 @@ func TestCreateNetworkSuccess(t *testing.T) {
 
 func TestCreateNetworkError(t *testing.T) {
 	request := `{"NetworkID":"d76cfa51738e8a12c5eca71ee69e9d65010a4b48eaad74adab439be7e61b9aaf","Options":{"com.docker.network.generic":    {}},"IPv4Data":[{"AddressSpace":"","Gateway":"172.18.0.1/16","Pool":"172.18.0.0/16"}],"IPv6Data":[]}`
-	response, err := http.Post("http://localhost:328567/NetworkDriver.CreateNetwork",
+	response, err := http.Post("http://localhost:32567/NetworkDriver.CreateNetwork",
 		sdk.DefaultContentTypeV1_1,
 		strings.NewReader(request))
 	if err != nil {
