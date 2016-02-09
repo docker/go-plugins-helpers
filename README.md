@@ -4,7 +4,7 @@ A collection of helper packages to extend Docker Engine in Go
 
  Plugin type   | Documentation | Description
  --------------|---------------|--------------------------------------------------
- Authorization | N/A                                                            | Extend API authorization mechanism
+ Authorization | [Link](https://docs.docker.com/engine/extend/authorization/)   | Extend API authorization mechanism
  Network       | [Link](https://docs.docker.com/engine/extend/plugins_network/) | Extend network management
  Volume        | [Link](https://docs.docker.com/engine/extend/plugins_volume/)  | Extend persistent storage
 
