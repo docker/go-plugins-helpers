@@ -127,16 +127,17 @@ type StaticRoute struct {
 
 // JoinResponse is sent in response to a JoinRequest
 type JoinResponse struct {
-	Gateway       string
-	InterfaceName InterfaceName
-	StaticRoutes  []*StaticRoute
+	InterfaceName         InterfaceName
+	Gateway               string
+	GatewayIPv6           string
+	StaticRoutes          []*StaticRoute
+	DisableGatewayService bool
 }
 
 // LeaveRequest is send by the daemon when a endpoint is leaving a network
 type LeaveRequest struct {
 	NetworkID  string
 	EndpointID string
-	Options    map[string]interface{}
 }
 
 // ErrorResponse is a formatted error message that libnetwork can understand
