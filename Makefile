@@ -2,7 +2,7 @@
 
 REPO_NAME = go-plugins-helpers
 REPO_OWNER = docker
-PKG_NAME = github.com/${REPO_NAME}/${REPO_OWNER}
+PKG_NAME = github.com/${REPO_OWNER}/${REPO_NAME}
 IMAGE = golang:1.5
 
 all: test
