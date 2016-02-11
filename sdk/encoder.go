@@ -2,6 +2,8 @@ package sdk
 
 import (
 	"encoding/json"
+	"io"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -23,4 +25,12 @@ func EncodeResponse(w http.ResponseWriter, res interface{}, err string) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	json.NewEncoder(w).Encode(res)
+}
+
+// StreamResponse streams a response object to the client
+func StreamResponse(w http.ResponseWriter, data io.ReadCloser) {
+	w.Header().Set("Content-Type", DefaultContentTypeV1_1)
+	defer data.Close()
+	byteStream, _ := ioutil.ReadAll(data)
+	w.Write(byteStream)
 }
