@@ -24,6 +24,8 @@ const (
 	leavePath          = "/NetworkDriver.Leave"
 	discoverNewPath    = "/NetworkDriver.DiscoverNew"
 	discoverDeletePath = "/NetworkDriver.DiscoverDelete"
+	programExtConnPath = "/NetworkDriver.ProgramExternalConnectivity"
+	revokeExtConnPath  = "/NetworkDriver.RevokeExternalConnectivity"
 )
 
 // Driver represent the interface a driver must fulfill.
@@ -38,6 +40,8 @@ type Driver interface {
 	Leave(*LeaveRequest) error
 	DiscoverNew(*DiscoveryNotification) error
 	DiscoverDelete(*DiscoveryNotification) error
+	ProgramExternalConnectivity(*ProgramExternalConnectivityRequest) error
+	RevokeExternalConnectivity(*RevokeExternalConnectivityRequest) error
 }
 
 // CapabilitiesResponse returns whether or not this network is global or local
@@ -149,6 +153,21 @@ type ErrorResponse struct {
 type DiscoveryNotification struct {
 	DiscoveryType int
 	DiscoveryData interface{}
+}
+
+// ProgramExternalConnectivityRequest specifies the L4 data
+// and the endpoint for which programming has to be done
+type ProgramExternalConnectivityRequest struct {
+	NetworkID  string
+	EndpointID string
+	Options    map[string]interface{}
+}
+
+// RevokeExternalConnectivityRequest specifies the endpoint
+// for which the L4 programming has to be removed
+type RevokeExternalConnectivityRequest struct {
+	NetworkID  string
+	EndpointID string
 }
 
 // NewErrorResponse creates an ErrorResponse with the provided message
@@ -301,6 +320,34 @@ func (h *Handler) initMux() {
 			return
 		}
 		err = h.driver.DiscoverDelete(req)
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			return
+		}
+		sdk.EncodeResponse(w, make(map[string]string), "")
+	})
+	h.HandleFunc(programExtConnPath, func(w http.ResponseWriter, r *http.Request) {
+		req := &ProgramExternalConnectivityRequest{}
+		err := sdk.DecodeRequest(w, r, req)
+		if err != nil {
+			return
+		}
+		err = h.driver.ProgramExternalConnectivity(req)
+		if err != nil {
+			msg := err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			return
+		}
+		sdk.EncodeResponse(w, make(map[string]string), "")
+	})
+	h.HandleFunc(revokeExtConnPath, func(w http.ResponseWriter, r *http.Request) {
+		req := &RevokeExternalConnectivityRequest{}
+		err := sdk.DecodeRequest(w, r, req)
+		if err != nil {
+			return
+		}
+		err = h.driver.RevokeExternalConnectivity(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)

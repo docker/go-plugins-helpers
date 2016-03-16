@@ -43,6 +43,26 @@ func (t *TestDriver) Leave(r *LeaveRequest) error {
 	return nil
 }
 
+func (t *TestDriver) ProgramExternalConnectivity(r *ProgramExternalConnectivityRequest) error {
+	i := r.Options["com.docker.network.endpoint.exposedports"]
+	epl, ok := i.([]interface{})
+	if !ok {
+		return fmt.Errorf("invalid data in request: %v (%T)", i, i)
+	}
+	ep, ok := epl[0].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("invalid data in request: %v (%T)", epl[0], epl[0])
+	}
+	if ep["Proto"].(float64) != 6 || ep["Port"].(float64) != 70 {
+		return fmt.Errorf("Unexpected exposed ports in request: %v", ep)
+	}
+	return nil
+}
+
+func (t *TestDriver) RevokeExternalConnectivity(r *RevokeExternalConnectivityRequest) error {
+	return nil
+}
+
 type ErrDriver struct {
 	Driver
 }
@@ -151,5 +171,21 @@ func TestCreateNetworkError(t *testing.T) {
 	}
 	if string(body) != "{\"Err\":\"I CAN HAZ ERRORZ\"}\n" {
 		t.Fatalf("Expected %s, got %s\n", "{\"Err\":\"I CAN HAZ ERRORZ\"}\n", string(body))
+	}
+}
+
+func TestProgramExternalConnectivity(t *testing.T) {
+	request := `{"NetworkID":"d76cfa51738e8a12c5eca71ee69e9d65010a4b48eaad74adab439be7e61b9aaf","EndpointID":"abccfa51738e8a12c5eca71ee69e9d65010a4b48eaad74adab439be7e61b9aaf","Options":{"com.docker.network.endpoint.exposedports":[{"Proto":6,"Port":70}],"com.docker.network.portmap":[{"Proto":6,"IP":"","Port":70,"HostIP":"","HostPort":7000,"HostPortEnd":7000}]}}`
+	response, err := http.Post("http://localhost:32234/NetworkDriver.ProgramExternalConnectivity",
+		sdk.DefaultContentTypeV1_1,
+		strings.NewReader(request))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		body, _ := ioutil.ReadAll(response.Body)
+		t.Fatalf("Expected %d, got %d: %s\n", http.StatusOK, response.StatusCode, string(body))
 	}
 }
