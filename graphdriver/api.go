@@ -34,7 +34,7 @@ const (
 // InitRequest is the structure that docker's init requests are deserialized to.
 type InitRequest struct {
 	Home    string
-	Options map[string]string `json:"Opts,omitempty"`
+	Options []string `json:"Opts"`
 }
 
 // InitResponse is the strucutre that docker's init responses are serialized to.
@@ -214,7 +214,7 @@ type DiffSizeResponse struct {
 
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
-	Init(home string, options map[string]string) error
+	Init(home string, options []string) error
 	Create(id, parent string) error
 	Remove(id string) error
 	Get(id, mountLabel string) (string, error)

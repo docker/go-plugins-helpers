@@ -438,7 +438,7 @@ type testPlugin struct {
 
 var _ Driver = &testPlugin{}
 
-func (p *testPlugin) Init(string, map[string]string) error {
+func (p *testPlugin) Init(string, []string) error {
 	p.init++
 	return nil
 }
