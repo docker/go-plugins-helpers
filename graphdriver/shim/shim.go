@@ -32,7 +32,6 @@ func (d *shimDriver) Init(home string, options []string) error {
 	}
 	d.driver = driver
 	return nil
-
 }
 
 var errNotInitialized = errors.New("Not initialized")
@@ -44,6 +43,15 @@ func (d *shimDriver) Create(id, parent string) error {
 	// FIXME(samoht): no way to pass mountLayer to the plugin?
 	// FIXME(samoht): no way to pass storage options to the plugin?
 	return d.driver.Create(id, parent, "", nil)
+}
+
+func (d *shimDriver) CreateReadWrite(id, parent string) error {
+	if d == nil {
+		return errNotInitialized
+	}
+	// FIXME(samoht): no way to pass mountLayer to the plugin?
+	// FIXME(samoht): no way to pass storage options to the plugin?
+	return d.driver.CreateReadWrite(id, parent, "", nil)
 }
 
 func (d *shimDriver) Remove(id string) error {

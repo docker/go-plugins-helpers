@@ -47,6 +47,18 @@ func TestHandler(t *testing.T) {
 		t.Fatalf("expected create 1, got %d", p.create)
 	}
 
+	// CreateReadWrite
+	createReadWrite, err := CallCreateReadWrite(url, client, CreateRequest{ID: "foo", Parent: "bar"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if create.Err != "" {
+		t.Fatalf("got error creating read-write graph drivers: %v", createReadWrite.Err)
+	}
+	if p.createRW != 1 {
+		t.Fatalf("expected createReadWrite 1, got %d", p.createRW)
+	}
+
 	// Remove
 	remove, err := CallRemove(url, client, RemoveRequest{ID: "foo"})
 	if err != nil {
@@ -183,6 +195,7 @@ func TestHandler(t *testing.T) {
 type testPlugin struct {
 	init        int
 	create      int
+	createRW    int
 	remove      int
 	get         int
 	put         int
@@ -205,6 +218,11 @@ func (p *testPlugin) Init(string, []string) error {
 
 func (p *testPlugin) Create(string, string) error {
 	p.create++
+	return nil
+}
+
+func (p *testPlugin) CreateReadWrite(string, string) error {
+	p.createRW++
 	return nil
 }
 

@@ -18,6 +18,7 @@ const (
 	manifest        = `{"Implements": ["GraphDriver"]}`
 	initPath        = "/GraphDriver.Init"
 	createPath      = "/GraphDriver.Create"
+	createRWPath    = "/GraphDriver.CreateReadWrite"
 	removePath      = "/GraphDriver.Remove"
 	getPath         = "/GraphDriver.Get"
 	putPath         = "/GraphDriver.Put"
@@ -218,6 +219,7 @@ type DiffSizeResponse struct {
 type Driver interface {
 	Init(home string, options []string) error
 	Create(id, parent string) error
+	CreateReadWrite(id, parent string) error
 	Remove(id string) error
 	Get(id, mountLabel string) (string, error)
 	Put(id string) error
@@ -265,6 +267,19 @@ func (h *Handler) initMux() {
 			return
 		}
 		err = h.driver.Create(req.ID, req.Parent)
+		msg := ""
+		if err != nil {
+			msg = err.Error()
+		}
+		sdk.EncodeResponse(w, &CreateResponse{Err: msg}, msg)
+	})
+	h.HandleFunc(createRWPath, func(w http.ResponseWriter, r *http.Request) {
+		req := CreateRequest{}
+		err := sdk.DecodeRequest(w, r, &req)
+		if err != nil {
+			return
+		}
+		err = h.driver.CreateReadWrite(req.ID, req.Parent)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -404,6 +419,26 @@ func CallInit(url string, client *http.Client, req InitRequest) (*InitResponse, 
 		return nil, err
 	}
 	var vResp InitResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+// CallCreateReadWrite is the raw call to the Graphdriver.CreateReadWrite method
+func CallCreateReadWrite(url string, client *http.Client, req CreateRequest) (*CreateResponse, error) {
+	method := createRWPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp CreateResponse
 	err = json.NewDecoder(resp.Body).Decode(&vResp)
 	if err != nil {
 		return nil, err
