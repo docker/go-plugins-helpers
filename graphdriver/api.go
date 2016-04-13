@@ -49,8 +49,9 @@ type InitResponse struct {
 
 // CreateRequest is the structure that docker's create requests are deserialized to.
 type CreateRequest struct {
-	ID     string
-	Parent string
+	ID         string
+	Parent     string
+	MountLabel string
 }
 
 // CreateResponse is the strucutre that docker's create responses are serialized to.

@@ -48,7 +48,8 @@ func TestHandler(t *testing.T) {
 	}
 
 	// CreateReadWrite
-	createReadWrite, err := CallCreateReadWrite(url, client, CreateRequest{ID: "foo", Parent: "bar"})
+	createReadWrite, err := CallCreateReadWrite(url, client,
+		CreateRequest{ID: "foo", Parent: "bar", MountLabel: "toto"})
 	if err != nil {
 		t.Fatal(err)
 	}
