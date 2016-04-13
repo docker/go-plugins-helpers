@@ -24,7 +24,7 @@ func TestHandler(t *testing.T) {
 	}}
 
 	// Init
-	init, err := PluginInitRequest(url, client, InitRequest{Home: "foo"})
+	init, err := CallInit(url, client, InitRequest{Home: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Create
-	create, err := PluginCreateRequest(url, client, CreateRequest{ID: "foo", Parent: "bar"})
+	create, err := CallCreate(url, client, CreateRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Remove
-	remove, err := PluginRemoveRequest(url, client, RemoveRequest{ID: "foo"})
+	remove, err := CallRemove(url, client, RemoveRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Get
-	get, err := PluginGetRequest(url, client, GetRequest{ID: "foo", MountLabel: "bar"})
+	get, err := CallGet(url, client, GetRequest{ID: "foo", MountLabel: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Put
-	put, err := PluginPutRequest(url, client, PutRequest{ID: "foo"})
+	put, err := CallPut(url, client, PutRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Exists
-	exists, err := PluginExistsRequest(url, client, ExistsRequest{ID: "foo"})
+	exists, err := CallExists(url, client, ExistsRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Status
-	status, err := PluginStatusRequest(url, client, StatusRequest{})
+	status, err := CallStatus(url, client, StatusRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +108,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// GetMetadata
-	getMetadata, err := PluginGetMetadataRequest(url, client, GetMetadataRequest{ID: "foo"})
+	getMetadata, err := CallGetMetadata(url, client, GetMetadataRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Cleanup
-	cleanup, err := PluginCleanupRequest(url, client, CleanupRequest{})
+	cleanup, err := CallCleanup(url, client, CleanupRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Diff
-	_, err = PluginDiffRequest(url, client, DiffRequest{ID: "foo", Parent: "bar"})
+	_, err = CallDiff(url, client, DiffRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Changes
-	changes, err := PluginChangesRequest(url, client, ChangesRequest{ID: "foo", Parent: "bar"})
+	changes, err := CallChanges(url, client, ChangesRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -155,7 +155,7 @@ func TestHandler(t *testing.T) {
 	// ApplyDiff
 	b := new(bytes.Buffer)
 	stream := bytes.NewReader(b.Bytes())
-	applyDiff, err := PluginApplyDiffRequest(url, client,
+	applyDiff, err := CallApplyDiff(url, client,
 		ApplyDiffRequest{ID: "foo", Parent: "bar", Stream: stream})
 	if err != nil {
 		t.Fatal(err)
@@ -168,7 +168,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// DiffSize
-	diffSize, err := PluginDiffSizeRequest(url, client, DiffSizeRequest{ID: "foo", Parent: "bar"})
+	diffSize, err := CallDiffSize(url, client, DiffSizeRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -392,7 +392,8 @@ func (h *Handler) initMux() {
 	})
 }
 
-func PluginInitRequest(url string, client *http.Client, req InitRequest) (*InitResponse, error) {
+// CallInit is the raw call to the Graphdriver.Init method
+func CallInit(url string, client *http.Client, req InitRequest) (*InitResponse, error) {
 	method := initPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -411,7 +412,8 @@ func PluginInitRequest(url string, client *http.Client, req InitRequest) (*InitR
 	return &vResp, nil
 }
 
-func PluginCreateRequest(url string, client *http.Client, req CreateRequest) (*CreateResponse, error) {
+// CallCreate is the raw call to the Graphdriver.Create method
+func CallCreate(url string, client *http.Client, req CreateRequest) (*CreateResponse, error) {
 	method := createPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -430,7 +432,8 @@ func PluginCreateRequest(url string, client *http.Client, req CreateRequest) (*C
 	return &vResp, nil
 }
 
-func PluginRemoveRequest(url string, client *http.Client, req RemoveRequest) (*RemoveResponse, error) {
+// CallRemove is the raw call to the Graphdriver.Remove method
+func CallRemove(url string, client *http.Client, req RemoveRequest) (*RemoveResponse, error) {
 	method := removePath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -449,7 +452,8 @@ func PluginRemoveRequest(url string, client *http.Client, req RemoveRequest) (*R
 	return &vResp, nil
 }
 
-func PluginGetRequest(url string, client *http.Client, req GetRequest) (*GetResponse, error) {
+// CallGet is the raw call to the Graphdriver.Get method
+func CallGet(url string, client *http.Client, req GetRequest) (*GetResponse, error) {
 	method := getPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -468,7 +472,8 @@ func PluginGetRequest(url string, client *http.Client, req GetRequest) (*GetResp
 	return &vResp, nil
 }
 
-func PluginPutRequest(url string, client *http.Client, req PutRequest) (*PutResponse, error) {
+// CallPut is the raw call to the Graphdriver.Put method
+func CallPut(url string, client *http.Client, req PutRequest) (*PutResponse, error) {
 	method := putPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -487,7 +492,8 @@ func PluginPutRequest(url string, client *http.Client, req PutRequest) (*PutResp
 	return &vResp, nil
 }
 
-func PluginExistsRequest(url string, client *http.Client, req ExistsRequest) (*ExistsResponse, error) {
+// CallExists is the raw call to the Graphdriver.Exists method
+func CallExists(url string, client *http.Client, req ExistsRequest) (*ExistsResponse, error) {
 	method := existsPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -506,7 +512,8 @@ func PluginExistsRequest(url string, client *http.Client, req ExistsRequest) (*E
 	return &vResp, nil
 }
 
-func PluginStatusRequest(url string, client *http.Client, req StatusRequest) (*StatusResponse, error) {
+// CallStatus is the raw call to the Graphdriver.Status method
+func CallStatus(url string, client *http.Client, req StatusRequest) (*StatusResponse, error) {
 	method := statusPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -525,7 +532,8 @@ func PluginStatusRequest(url string, client *http.Client, req StatusRequest) (*S
 	return &vResp, nil
 }
 
-func PluginGetMetadataRequest(url string, client *http.Client, req GetMetadataRequest) (*GetMetadataResponse, error) {
+// CallGetMetadata is the raw call to the Graphdriver.GetMetadata method
+func CallGetMetadata(url string, client *http.Client, req GetMetadataRequest) (*GetMetadataResponse, error) {
 	method := getMetadataPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -544,7 +552,8 @@ func PluginGetMetadataRequest(url string, client *http.Client, req GetMetadataRe
 	return &vResp, nil
 }
 
-func PluginCleanupRequest(url string, client *http.Client, req CleanupRequest) (*CleanupResponse, error) {
+// CallCleanup is the raw call to the Graphdriver.Cleanup method
+func CallCleanup(url string, client *http.Client, req CleanupRequest) (*CleanupResponse, error) {
 	method := cleanupPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -563,7 +572,8 @@ func PluginCleanupRequest(url string, client *http.Client, req CleanupRequest) (
 	return &vResp, nil
 }
 
-func PluginDiffRequest(url string, client *http.Client, req DiffRequest) (*DiffResponse, error) {
+// CallDiff is the raw call to the Graphdriver.Diff method
+func CallDiff(url string, client *http.Client, req DiffRequest) (*DiffResponse, error) {
 	method := diffPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -576,7 +586,8 @@ func PluginDiffRequest(url string, client *http.Client, req DiffRequest) (*DiffR
 	return &DiffResponse{Stream: resp.Body}, nil
 }
 
-func PluginChangesRequest(url string, client *http.Client, req ChangesRequest) (*ChangesResponse, error) {
+// CallChanges is the raw call to the Graphdriver.Changes method
+func CallChanges(url string, client *http.Client, req ChangesRequest) (*ChangesResponse, error) {
 	method := changesPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -595,7 +606,8 @@ func PluginChangesRequest(url string, client *http.Client, req ChangesRequest) (
 	return &vResp, nil
 }
 
-func PluginApplyDiffRequest(url string, client *http.Client, req ApplyDiffRequest) (*ApplyDiffResponse, error) {
+// CallApplyDiff is the raw call to the Graphdriver.ApplyDiff method
+func CallApplyDiff(url string, client *http.Client, req ApplyDiffRequest) (*ApplyDiffResponse, error) {
 	method := applyDiffPath
 	b, err := json.Marshal(req)
 	if err != nil {
@@ -614,7 +626,8 @@ func PluginApplyDiffRequest(url string, client *http.Client, req ApplyDiffReques
 	return &vResp, nil
 }
 
-func PluginDiffSizeRequest(url string, client *http.Client, req DiffSizeRequest) (*DiffSizeResponse, error) {
+// CallDiffSize is the raw call to the Graphdriver.CallDiffSize method
+func CallDiffSize(url string, client *http.Client, req DiffSizeRequest) (*DiffSizeResponse, error) {
 	method := diffSizePath
 	b, err := json.Marshal(req)
 	if err != nil {

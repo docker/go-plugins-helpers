@@ -65,7 +65,7 @@ func TestGraphDriver(t *testing.T) {
 		Dial: l.Dial,
 	}}
 
-	resp, err := graphPlugin.PluginInitRequest(url, client, graphPlugin.InitRequest{Home: "foo"})
+	resp, err := graphPlugin.CallInit(url, client, graphPlugin.InitRequest{Home: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
