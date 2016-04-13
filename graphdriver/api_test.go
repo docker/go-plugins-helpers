@@ -2,7 +2,6 @@ package graphdriver
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +9,8 @@ import (
 
 	"github.com/docker/go-connections/sockets"
 )
+
+const url = "http://localhost"
 
 func TestHandler(t *testing.T) {
 	p := &testPlugin{}
@@ -23,7 +24,7 @@ func TestHandler(t *testing.T) {
 	}}
 
 	// Init
-	init, err := pluginInitRequest(client, InitRequest{Home: "foo"})
+	init, err := PluginInitRequest(url, client, InitRequest{Home: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +36,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Create
-	create, err := pluginCreateRequest(client, CreateRequest{ID: "foo", Parent: "bar"})
+	create, err := PluginCreateRequest(url, client, CreateRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +48,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Remove
-	remove, err := pluginRemoveRequest(client, RemoveRequest{ID: "foo"})
+	remove, err := PluginRemoveRequest(url, client, RemoveRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +60,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Get
-	get, err := pluginGetRequest(client, GetRequest{ID: "foo", MountLabel: "bar"})
+	get, err := PluginGetRequest(url, client, GetRequest{ID: "foo", MountLabel: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +72,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Put
-	put, err := pluginPutRequest(client, PutRequest{ID: "foo"})
+	put, err := PluginPutRequest(url, client, PutRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +84,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Exists
-	exists, err := pluginExistsRequest(client, ExistsRequest{ID: "foo"})
+	exists, err := PluginExistsRequest(url, client, ExistsRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +96,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Status
-	status, err := pluginStatusRequest(client, StatusRequest{})
+	status, err := PluginStatusRequest(url, client, StatusRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +108,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// GetMetadata
-	getMetadata, err := pluginGetMetadataRequest(client, GetMetadataRequest{ID: "foo"})
+	getMetadata, err := PluginGetMetadataRequest(url, client, GetMetadataRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +120,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Cleanup
-	cleanup, err := pluginCleanupRequest(client, CleanupRequest{})
+	cleanup, err := PluginCleanupRequest(url, client, CleanupRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +132,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Diff
-	_, err = pluginDiffRequest(client, DiffRequest{ID: "foo", Parent: "bar"})
+	_, err = PluginDiffRequest(url, client, DiffRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,7 +141,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Changes
-	changes, err := pluginChangesRequest(client, ChangesRequest{ID: "foo", Parent: "bar"})
+	changes, err := PluginChangesRequest(url, client, ChangesRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +155,7 @@ func TestHandler(t *testing.T) {
 	// ApplyDiff
 	b := new(bytes.Buffer)
 	stream := bytes.NewReader(b.Bytes())
-	applyDiff, err := pluginApplyDiffRequest(client,
+	applyDiff, err := PluginApplyDiffRequest(url, client,
 		ApplyDiffRequest{ID: "foo", Parent: "bar", Stream: stream})
 	if err != nil {
 		t.Fatal(err)
@@ -167,7 +168,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// DiffSize
-	diffSize, err := pluginDiffSizeRequest(client, DiffSizeRequest{ID: "foo", Parent: "bar"})
+	diffSize, err := PluginDiffSizeRequest(url, client, DiffSizeRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,247 +178,6 @@ func TestHandler(t *testing.T) {
 	if p.diffSize != 1 {
 		t.Fatalf("expected diffSize 1, got %d", p.diffSize)
 	}
-}
-
-func pluginInitRequest(client *http.Client, req InitRequest) (*InitResponse, error) {
-	method := initPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp InitResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginCreateRequest(client *http.Client, req CreateRequest) (*CreateResponse, error) {
-	method := createPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp CreateResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginRemoveRequest(client *http.Client, req RemoveRequest) (*RemoveResponse, error) {
-	method := removePath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp RemoveResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginGetRequest(client *http.Client, req GetRequest) (*GetResponse, error) {
-	method := getPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp GetResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginPutRequest(client *http.Client, req PutRequest) (*PutResponse, error) {
-	method := putPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp PutResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginExistsRequest(client *http.Client, req ExistsRequest) (*ExistsResponse, error) {
-	method := existsPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp ExistsResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginStatusRequest(client *http.Client, req StatusRequest) (*StatusResponse, error) {
-	method := statusPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp StatusResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginGetMetadataRequest(client *http.Client, req GetMetadataRequest) (*GetMetadataResponse, error) {
-	method := getMetadataPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp GetMetadataResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginCleanupRequest(client *http.Client, req CleanupRequest) (*CleanupResponse, error) {
-	method := cleanupPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp CleanupResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginDiffRequest(client *http.Client, req DiffRequest) (*DiffResponse, error) {
-	method := diffPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	return &DiffResponse{Stream: resp.Body}, nil
-}
-
-func pluginChangesRequest(client *http.Client, req ChangesRequest) (*ChangesResponse, error) {
-	method := changesPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp ChangesResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginApplyDiffRequest(client *http.Client, req ApplyDiffRequest) (*ApplyDiffResponse, error) {
-	method := applyDiffPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp ApplyDiffResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-func pluginDiffSizeRequest(client *http.Client, req DiffSizeRequest) (*DiffSizeResponse, error) {
-	method := diffSizePath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp DiffSizeResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
 }
 
 type testPlugin struct {

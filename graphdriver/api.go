@@ -3,6 +3,8 @@ package graphdriver
 // See https://github.com/docker/docker/blob/master/experimental/plugins_graphdriver.md
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 
@@ -388,4 +390,245 @@ func (h *Handler) initMux() {
 		}
 		sdk.EncodeResponse(w, &DiffSizeResponse{Err: msg, Size: size}, msg)
 	})
+}
+
+func PluginInitRequest(url string, client *http.Client, req InitRequest) (*InitResponse, error) {
+	method := initPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp InitResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginCreateRequest(url string, client *http.Client, req CreateRequest) (*CreateResponse, error) {
+	method := createPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp CreateResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginRemoveRequest(url string, client *http.Client, req RemoveRequest) (*RemoveResponse, error) {
+	method := removePath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp RemoveResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginGetRequest(url string, client *http.Client, req GetRequest) (*GetResponse, error) {
+	method := getPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp GetResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginPutRequest(url string, client *http.Client, req PutRequest) (*PutResponse, error) {
+	method := putPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp PutResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginExistsRequest(url string, client *http.Client, req ExistsRequest) (*ExistsResponse, error) {
+	method := existsPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp ExistsResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginStatusRequest(url string, client *http.Client, req StatusRequest) (*StatusResponse, error) {
+	method := statusPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp StatusResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginGetMetadataRequest(url string, client *http.Client, req GetMetadataRequest) (*GetMetadataResponse, error) {
+	method := getMetadataPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp GetMetadataResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginCleanupRequest(url string, client *http.Client, req CleanupRequest) (*CleanupResponse, error) {
+	method := cleanupPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp CleanupResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginDiffRequest(url string, client *http.Client, req DiffRequest) (*DiffResponse, error) {
+	method := diffPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	return &DiffResponse{Stream: resp.Body}, nil
+}
+
+func PluginChangesRequest(url string, client *http.Client, req ChangesRequest) (*ChangesResponse, error) {
+	method := changesPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp ChangesResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginApplyDiffRequest(url string, client *http.Client, req ApplyDiffRequest) (*ApplyDiffResponse, error) {
+	method := applyDiffPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp ApplyDiffResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+func PluginDiffSizeRequest(url string, client *http.Client, req DiffSizeRequest) (*DiffSizeResponse, error) {
+	method := diffSizePath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp DiffSizeResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
 }
