@@ -7,7 +7,7 @@ Go handler to create external volume extensions for Docker.
 This library is designed to be integrated in your program.
 
 1. Implement the `volume.Driver` interface.
-2. Initialize a `volume.Hander` with your implementation.
+2. Initialize a `volume.Handler` with your implementation.
 3. Call either `ServeTCP` or `ServeUnix` from the `volume.Handler`.
 
 ### Example using TCP sockets:
