@@ -1,6 +1,9 @@
-package volume
+package shim
 
-import "github.com/docker/docker/volume"
+import (
+	"github.com/docker/docker/volume"
+	volumeplugin "github.com/docker/go-plugins-helpers/volume"
+)
 
 type shimDriver struct {
 	d volume.Driver
@@ -11,12 +14,12 @@ type shimDriver struct {
 // to Docker Engine and it would create a plugin from it that maps plugin API calls
 // directly to any volume driver that satifies the volume.Driver interface from
 // Docker Engine.
-func NewHandlerFromVolumeDriver(d volume.Driver) *Handler {
-	return NewHandler(&shimDriver{d})
+func NewHandlerFromVolumeDriver(d volume.Driver) *volumeplugin.Handler {
+	return volumeplugin.NewHandler(&shimDriver{d})
 }
 
-func (d *shimDriver) Create(req Request) Response {
-	var res Response
+func (d *shimDriver) Create(req volumeplugin.Request) volumeplugin.Response {
+	var res volumeplugin.Response
 	_, err := d.d.Create(req.Name, req.Options)
 	if err != nil {
 		res.Err = err.Error()
@@ -24,17 +27,17 @@ func (d *shimDriver) Create(req Request) Response {
 	return res
 }
 
-func (d *shimDriver) List(req Request) Response {
-	var res Response
+func (d *shimDriver) List(req volumeplugin.Request) volumeplugin.Response {
+	var res volumeplugin.Response
 	ls, err := d.d.List()
 	if err != nil {
 		res.Err = err.Error()
 		return res
 	}
-	vols := make([]*Volume, len(ls))
+	vols := make([]*volumeplugin.Volume, len(ls))
 
 	for _, v := range ls {
-		vol := &Volume{
+		vol := &volumeplugin.Volume{
 			Name:       v.Name(),
 			Mountpoint: v.Path(),
 		}
@@ -44,22 +47,22 @@ func (d *shimDriver) List(req Request) Response {
 	return res
 }
 
-func (d *shimDriver) Get(req Request) Response {
-	var res Response
+func (d *shimDriver) Get(req volumeplugin.Request) volumeplugin.Response {
+	var res volumeplugin.Response
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
 		return res
 	}
-	res.Volume = &Volume{
+	res.Volume = &volumeplugin.Volume{
 		Name:       v.Name(),
 		Mountpoint: v.Path(),
 	}
 	return res
 }
 
-func (d *shimDriver) Remove(req Request) Response {
-	var res Response
+func (d *shimDriver) Remove(req volumeplugin.Request) volumeplugin.Response {
+	var res volumeplugin.Response
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
@@ -71,8 +74,8 @@ func (d *shimDriver) Remove(req Request) Response {
 	return res
 }
 
-func (d *shimDriver) Path(req Request) Response {
-	var res Response
+func (d *shimDriver) Path(req volumeplugin.Request) volumeplugin.Response {
+	var res volumeplugin.Response
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
@@ -82,8 +85,8 @@ func (d *shimDriver) Path(req Request) Response {
 	return res
 }
 
-func (d *shimDriver) Mount(req Request) Response {
-	var res Response
+func (d *shimDriver) Mount(req volumeplugin.Request) volumeplugin.Response {
+	var res volumeplugin.Response
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
@@ -97,8 +100,8 @@ func (d *shimDriver) Mount(req Request) Response {
 	return res
 }
 
-func (d *shimDriver) Unmount(req Request) Response {
-	var res Response
+func (d *shimDriver) Unmount(req volumeplugin.Request) volumeplugin.Response {
+	var res volumeplugin.Response
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
