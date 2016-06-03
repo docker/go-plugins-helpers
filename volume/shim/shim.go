@@ -92,7 +92,7 @@ func (d *shimDriver) Mount(req volumeplugin.Request) volumeplugin.Response {
 		res.Err = err.Error()
 		return res
 	}
-	pth, err := v.Mount()
+	pth, err := v.Mount(req)
 	if err != nil {
 		res.Err = err.Error()
 	}
@@ -107,7 +107,7 @@ func (d *shimDriver) Unmount(req volumeplugin.Request) volumeplugin.Response {
 		res.Err = err.Error()
 		return res
 	}
-	if err := v.Unmount(); err != nil {
+	if err := v.Unmount(req); err != nil {
 		res.Err = err.Error()
 	}
 	return res
