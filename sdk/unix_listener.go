@@ -10,9 +10,7 @@ import (
 	"github.com/docker/go-connections/sockets"
 )
 
-const (
-	pluginSockDir = "/run/docker/plugins"
-)
+const pluginSockDir = "/run/docker/plugins"
 
 func newUnixListener(pluginName string, gid int) (net.Listener, string, error) {
 	path, err := fullSocketAddress(pluginName)
