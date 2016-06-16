@@ -100,6 +100,18 @@ func TestHandler(t *testing.T) {
 	if p.remove != 1 {
 		t.Fatalf("expected remove 1, got %d", p.remove)
 	}
+
+	// Capabilities
+	resp, err = pluginRequest(client, capabilitiesPath, Request{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Err != "" {
+		t.Fatalf("got error removing volume: %s", resp.Err)
+	}
+	if p.capabilities != 1 {
+		t.Fatalf("expected remove 1, got %d", p.capabilities)
+	}
 }
 
 func pluginRequest(client *http.Client, method string, req Request) (*Response, error) {
@@ -121,14 +133,15 @@ func pluginRequest(client *http.Client, method string, req Request) (*Response, 
 }
 
 type testPlugin struct {
-	volumes []string
-	create  int
-	get     int
-	list    int
-	path    int
-	mount   int
-	unmount int
-	remove  int
+	volumes      []string
+	create       int
+	get          int
+	list         int
+	path         int
+	mount        int
+	unmount      int
+	remove       int
+	capabilities int
 }
 
 func (p *testPlugin) Create(req Request) Response {
@@ -195,4 +208,9 @@ func (p *testPlugin) Unmount(req Request) Response {
 		}
 	}
 	return Response{Err: "no such volume"}
+}
+
+func (p *testPlugin) Capabilities(req Request) Response {
+	p.capabilities++
+	return Response{Capabilities: Capability{Scope: "local"}}
 }

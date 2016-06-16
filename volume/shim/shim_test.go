@@ -25,6 +25,7 @@ func (testVolumeDriver) Create(string, map[string]string) (volume.Volume, error)
 func (testVolumeDriver) Remove(volume.Volume) error                              { return nil }
 func (testVolumeDriver) List() ([]volume.Volume, error)                          { return nil, nil }
 func (testVolumeDriver) Get(name string) (volume.Volume, error)                  { return nil, nil }
+func (testVolumeDriver) Scope() string                                           { return "local" }
 
 func TestVolumeDriver(t *testing.T) {
 	h := NewHandlerFromVolumeDriver(testVolumeDriver{})
