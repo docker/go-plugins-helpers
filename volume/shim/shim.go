@@ -36,12 +36,12 @@ func (d *shimDriver) List(req volumeplugin.Request) volumeplugin.Response {
 	}
 	vols := make([]*volumeplugin.Volume, len(ls))
 
-	for _, v := range ls {
+	for i, v := range ls {
 		vol := &volumeplugin.Volume{
 			Name:       v.Name(),
 			Mountpoint: v.Path(),
 		}
-		vols = append(vols, vol)
+		vols[i] = vol
 	}
 	res.Volumes = vols
 	return res
@@ -92,7 +92,7 @@ func (d *shimDriver) Mount(req volumeplugin.Request) volumeplugin.Response {
 		res.Err = err.Error()
 		return res
 	}
-	pth, err := v.Mount()
+	pth, err := v.Mount(req.MountID)
 	if err != nil {
 		res.Err = err.Error()
 	}
@@ -107,8 +107,14 @@ func (d *shimDriver) Unmount(req volumeplugin.Request) volumeplugin.Response {
 		res.Err = err.Error()
 		return res
 	}
-	if err := v.Unmount(); err != nil {
+	if err := v.Unmount(req.MountID); err != nil {
 		res.Err = err.Error()
 	}
+	return res
+}
+
+func (d *shimDriver) Capabilities(req volumeplugin.Request) volumeplugin.Response {
+	var res volumeplugin.Response
+	res.Capabilities = volumeplugin.Capability{Scope: d.d.Scope()}
 	return res
 }

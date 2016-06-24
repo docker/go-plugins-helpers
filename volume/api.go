@@ -10,34 +10,42 @@ const (
 	// DefaultDockerRootDirectory is the default directory where volumes will be created.
 	DefaultDockerRootDirectory = "/var/lib/docker-volumes"
 
-	manifest        = `{"Implements": ["VolumeDriver"]}`
-	createPath      = "/VolumeDriver.Create"
-	getPath         = "/VolumeDriver.Get"
-	listPath        = "/VolumeDriver.List"
-	removePath      = "/VolumeDriver.Remove"
-	hostVirtualPath = "/VolumeDriver.Path"
-	mountPath       = "/VolumeDriver.Mount"
-	unmountPath     = "/VolumeDriver.Unmount"
+	manifest         = `{"Implements": ["VolumeDriver"]}`
+	createPath       = "/VolumeDriver.Create"
+	getPath          = "/VolumeDriver.Get"
+	listPath         = "/VolumeDriver.List"
+	removePath       = "/VolumeDriver.Remove"
+	hostVirtualPath  = "/VolumeDriver.Path"
+	mountPath        = "/VolumeDriver.Mount"
+	unmountPath      = "/VolumeDriver.Unmount"
+	capabilitiesPath = "/VolumeDriver.Capabilities"
 )
 
 // Request is the structure that docker's requests are deserialized to.
 type Request struct {
 	Name    string
 	Options map[string]string `json:"Opts,omitempty"`
+	MountID string            `json:",omitempty"`
 }
 
 // Response is the strucutre that the plugin's responses are serialized to.
 type Response struct {
-	Mountpoint string
-	Err        string
-	Volumes    []*Volume
-	Volume     *Volume
+	Mountpoint   string
+	Err          string
+	Volumes      []*Volume
+	Volume       *Volume
+	Capabilities Capability
 }
 
 // Volume represents a volume object for use with `Get` and `List` requests
 type Volume struct {
 	Name       string
 	Mountpoint string
+}
+
+// Capability represents the list of capabilities a volume driver can return
+type Capability struct {
+	Scope string
 }
 
 // Driver represent the interface a driver must fulfill.
@@ -49,6 +57,7 @@ type Driver interface {
 	Path(Request) Response
 	Mount(Request) Response
 	Unmount(Request) Response
+	Capabilities(Request) Response
 }
 
 // Handler forwards requests and responses between the docker daemon and the plugin.
@@ -93,6 +102,9 @@ func (h *Handler) initMux() {
 
 	h.handle(unmountPath, func(req Request) Response {
 		return h.driver.Unmount(req)
+	})
+	h.handle(capabilitiesPath, func(req Request) Response {
+		return h.driver.Capabilities(req)
 	})
 }
 
