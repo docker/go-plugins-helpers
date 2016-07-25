@@ -41,6 +41,7 @@ type Response struct {
 type Volume struct {
 	Name       string
 	Mountpoint string
+	Status     map[string]interface{}
 }
 
 // Capability represents the list of capabilities a volume driver can return
