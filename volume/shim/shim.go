@@ -85,14 +85,14 @@ func (d *shimDriver) Path(req volumeplugin.Request) volumeplugin.Response {
 	return res
 }
 
-func (d *shimDriver) Mount(req volumeplugin.Request) volumeplugin.Response {
+func (d *shimDriver) Mount(req volumeplugin.MountRequest) volumeplugin.Response {
 	var res volumeplugin.Response
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
 		return res
 	}
-	pth, err := v.Mount(req.MountID)
+	pth, err := v.Mount(req.ID)
 	if err != nil {
 		res.Err = err.Error()
 	}
@@ -100,14 +100,14 @@ func (d *shimDriver) Mount(req volumeplugin.Request) volumeplugin.Response {
 	return res
 }
 
-func (d *shimDriver) Unmount(req volumeplugin.Request) volumeplugin.Response {
+func (d *shimDriver) Unmount(req volumeplugin.UnmountRequest) volumeplugin.Response {
 	var res volumeplugin.Response
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
 		return res
 	}
-	if err := v.Unmount(req.MountID); err != nil {
+	if err := v.Unmount(req.ID); err != nil {
 		res.Err = err.Error()
 	}
 	return res
