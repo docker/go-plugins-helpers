@@ -190,7 +190,7 @@ func (p *testPlugin) Path(req Request) Response {
 	return Response{Err: "no such volume"}
 }
 
-func (p *testPlugin) Mount(req Request) Response {
+func (p *testPlugin) Mount(req MountRequest) Response {
 	p.mount++
 	for _, v := range p.volumes {
 		if v == req.Name {
@@ -200,7 +200,7 @@ func (p *testPlugin) Mount(req Request) Response {
 	return Response{Err: "no such volume"}
 }
 
-func (p *testPlugin) Unmount(req Request) Response {
+func (p *testPlugin) Unmount(req UnmountRequest) Response {
 	p.unmount++
 	for _, v := range p.volumes {
 		if v == req.Name {

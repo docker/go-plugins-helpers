@@ -25,7 +25,18 @@ const (
 type Request struct {
 	Name    string
 	Options map[string]string `json:"Opts,omitempty"`
-	MountID string            `json:",omitempty"`
+}
+
+// MountRequest structure for a volume mount request
+type MountRequest struct {
+	Name string
+	ID   string
+}
+
+// UnmountRequest structure for a volume unmount request
+type UnmountRequest struct {
+	Name string
+	ID   string
 }
 
 // Response is the strucutre that the plugin's responses are serialized to.
@@ -55,8 +66,8 @@ type Driver interface {
 	Get(Request) Response
 	Remove(Request) Response
 	Path(Request) Response
-	Mount(Request) Response
-	Unmount(Request) Response
+	Mount(MountRequest) Response
+	Unmount(UnmountRequest) Response
 	Capabilities(Request) Response
 }
 
@@ -67,6 +78,8 @@ type Handler struct {
 }
 
 type actionHandler func(Request) Response
+type mountActionHandler func(MountRequest) Response
+type unmountActionHandler func(UnmountRequest) Response
 
 // NewHandler initializes the request handler with a driver implementation.
 func NewHandler(driver Driver) *Handler {
@@ -96,11 +109,11 @@ func (h *Handler) initMux() {
 		return h.driver.Path(req)
 	})
 
-	h.handle(mountPath, func(req Request) Response {
+	h.handleMount(mountPath, func(req MountRequest) Response {
 		return h.driver.Mount(req)
 	})
 
-	h.handle(unmountPath, func(req Request) Response {
+	h.handleUnmount(unmountPath, func(req UnmountRequest) Response {
 		return h.driver.Unmount(req)
 	})
 	h.handle(capabilitiesPath, func(req Request) Response {
@@ -117,6 +130,30 @@ func (h *Handler) handle(name string, actionCall actionHandler) {
 
 		res := actionCall(req)
 
+		sdk.EncodeResponse(w, res, res.Err)
+	})
+}
+
+func (h *Handler) handleMount(name string, actionCall mountActionHandler) {
+	h.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
+		var req MountRequest
+		if err := sdk.DecodeRequest(w, r, &req); err != nil {
+			return
+		}
+
+		res := actionCall(req)
+		sdk.EncodeResponse(w, res, res.Err)
+	})
+}
+
+func (h *Handler) handleUnmount(name string, actionCall unmountActionHandler) {
+	h.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
+		var req UnmountRequest
+		if err := sdk.DecodeRequest(w, r, &req); err != nil {
+			return
+		}
+
+		res := actionCall(req)
 		sdk.EncodeResponse(w, res, res.Err)
 	})
 }
