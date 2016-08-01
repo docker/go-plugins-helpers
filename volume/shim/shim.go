@@ -57,6 +57,7 @@ func (d *shimDriver) Get(req volumeplugin.Request) volumeplugin.Response {
 	res.Volume = &volumeplugin.Volume{
 		Name:       v.Name(),
 		Mountpoint: v.Path(),
+		Status:     v.Status(),
 	}
 	return res
 }
