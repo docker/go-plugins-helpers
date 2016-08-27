@@ -1,10 +1,12 @@
 package sdk
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/docker/go-connections/sockets"
 )
@@ -14,6 +16,14 @@ const (
 )
 
 func newTCPListener(address string, pluginName string) (net.Listener, string, error) {
+	if address == "" {
+		return nil, "", fmt.Errorf("plugin address cannot be empty")
+	}
+	addrParts := strings.SplitN(address, ":", 2)
+	if addrParts[0] == "" {
+		address = "localhost" + address
+	}
+
 	listener, err := sockets.NewTCPSocket(address, nil)
 	if err != nil {
 		return nil, "", err
