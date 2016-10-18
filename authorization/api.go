@@ -1,6 +1,7 @@
 package authorization
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/docker/docker/pkg/authorization"
@@ -52,9 +53,13 @@ type actionHandler func(Request) Response
 
 func (h *Handler) handle(name string, actionCall actionHandler) {
 	h.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
-		var req Request
-		if err := sdk.DecodeRequest(w, r, &req); err != nil {
-			return
+		var (
+			req Request
+			d   = json.NewDecoder(r.Body)
+		)
+		d.UseNumber()
+		if err := d.Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
 		res := actionCall(req)
