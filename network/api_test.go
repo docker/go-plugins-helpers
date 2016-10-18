@@ -98,11 +98,11 @@ func (e *ErrDriver) Leave(r *LeaveRequest) error {
 func TestMain(m *testing.M) {
 	d := &TestDriver{}
 	h1 := NewHandler(d)
-	go h1.ServeTCP("test", ":32234")
+	go h1.ServeTCP("test", ":32234", nil)
 
 	e := &ErrDriver{}
 	h2 := NewHandler(e)
-	go h2.ServeTCP("err", ":32567")
+	go h2.ServeTCP("err", ":32567", nil)
 
 	m.Run()
 }
