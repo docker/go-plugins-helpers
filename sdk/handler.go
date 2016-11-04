@@ -38,7 +38,7 @@ func (h Handler) Serve(l net.Listener) error {
 }
 
 // ServeTCP makes the handler to listen for request in a given TCP address.
-// It also writes the spec file on the right directory for docker to read.
+// It also writes the spec file in the right directory for docker to read.
 func (h Handler) ServeTCP(pluginName, addr string, tlsConfig *tls.Config) error {
 	l, spec, err := newTCPListener(addr, pluginName, tlsConfig)
 	if err != nil {
@@ -51,9 +51,22 @@ func (h Handler) ServeTCP(pluginName, addr string, tlsConfig *tls.Config) error 
 }
 
 // ServeUnix makes the handler to listen for requests in a unix socket.
-// It also creates the socket file on the right directory for docker to read.
+// It also creates the socket file in the right directory for docker to read.
 func (h Handler) ServeUnix(addr string, gid int) error {
 	l, spec, err := newUnixListener(addr, gid)
+	if err != nil {
+		return err
+	}
+	if spec != "" {
+		defer os.Remove(spec)
+	}
+	return h.Serve(l)
+}
+
+// ServeWindows makes the handler to listen for request in a windows named pipe.
+// It also creates the spec file in the right directory for docker to read.
+func (h Handler) ServeWindows(addr, pluginName string, pipeConfig *WindowsPipeConfig) error {
+	l, spec, err := newWindowsListener(addr, pluginName, pipeConfig)
 	if err != nil {
 		return err
 	}
