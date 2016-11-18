@@ -24,7 +24,7 @@ func NewHandlerFromGraphDriver(init graphDriver.InitFunc) *graphPlugin.Handler {
 	return graphPlugin.NewHandler(&shimDriver{driver: nil, init: init})
 }
 
-func (d *shimDriver) Init(home string, options []string) error {
+func (d *shimDriver) Init(home string, options, uidMaps, gidMaps []string) error {
 	// FIXME(samoht): no way to pass UID and UID mapping?
 	driver, err := d.init(home, options, nil, nil)
 	if err != nil {
@@ -36,20 +36,26 @@ func (d *shimDriver) Init(home string, options []string) error {
 
 var errNotInitialized = errors.New("Not initialized")
 
-func (d *shimDriver) Create(id, parent string) error {
+func (d *shimDriver) Create(id, parent, mountLabel string, storageOpt map[string]string) error {
 	if d == nil {
 		return errNotInitialized
 	}
-	// FIXME(samoht): no way to pass storage options to the plugin?
-	return d.driver.Create(id, parent, "", nil)
+	opts := graphDriver.CreateOpts{
+		MountLabel: mountLabel,
+		StorageOpt: storageOpt,
+	}
+	return d.driver.Create(id, parent, &opts)
 }
 
-func (d *shimDriver) CreateReadWrite(id, parent string) error {
+func (d *shimDriver) CreateReadWrite(id, parent, mountLabel string, storageOpt map[string]string) error {
 	if d == nil {
 		return errNotInitialized
 	}
-	// FIXME(samoht): no way to pass storage options to the plugin?
-	return d.driver.CreateReadWrite(id, parent, "", nil)
+	opts := graphDriver.CreateOpts{
+		MountLabel: mountLabel,
+		StorageOpt: storageOpt,
+	}
+	return d.driver.CreateReadWrite(id, parent, &opts)
 }
 
 func (d *shimDriver) Remove(id string) error {
