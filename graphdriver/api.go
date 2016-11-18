@@ -38,6 +38,8 @@ const (
 type InitRequest struct {
 	Home    string
 	Options []string `json:"Opts"`
+	UIDMaps []string `json:"UIDMaps"`
+	GIDMaps []string `json:"GIDMaps"`
 }
 
 // InitResponse is the strucutre that docker's init responses are serialized to.
@@ -52,6 +54,7 @@ type CreateRequest struct {
 	ID         string
 	Parent     string
 	MountLabel string
+	StorageOpt map[string]string
 }
 
 // CreateResponse is the strucutre that docker's create responses are serialized to.
@@ -218,9 +221,9 @@ type DiffSizeResponse struct {
 
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
-	Init(home string, options []string) error
-	Create(id, parent string) error
-	CreateReadWrite(id, parent string) error
+	Init(home string, options []string, uidMaps []string, gidMaps []string) error
+	Create(id, parent, mountlabel string, storageOpt map[string]string) error
+	CreateReadWrite(id, parent, mountlabel string, storageOpt map[string]string) error
 	Remove(id string) error
 	Get(id, mountLabel string) (string, error)
 	Put(id string) error
@@ -254,7 +257,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.Init(req.Home, req.Options)
+		err = h.driver.Init(req.Home, req.Options, req.UIDMaps, req.GIDMaps)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -267,7 +270,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.Create(req.ID, req.Parent)
+		err = h.driver.Create(req.ID, req.Parent, req.MountLabel, req.StorageOpt)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -280,7 +283,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.CreateReadWrite(req.ID, req.Parent)
+		err = h.driver.CreateReadWrite(req.ID, req.Parent, req.MountLabel, req.StorageOpt)
 		msg := ""
 		if err != nil {
 			msg = err.Error()

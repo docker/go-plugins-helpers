@@ -20,10 +20,10 @@ func (t *testGraphDriver) String() string {
 }
 
 // FIXME(samoht): this doesn't seem to be called by the plugins
-func (t *testGraphDriver) CreateReadWrite(id, parent, mountLabel string, storageOpt map[string]string) error {
+func (t *testGraphDriver) CreateReadWrite(id, parent string, opts *graphdriver.CreateOpts) error {
 	return nil
 }
-func (t *testGraphDriver) Create(id, parent, mountLabel string, storageOpt map[string]string) error {
+func (t *testGraphDriver) Create(id, parent string, opts *graphdriver.CreateOpts) error {
 	return nil
 }
 func (t *testGraphDriver) Remove(id string) error {
