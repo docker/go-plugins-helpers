@@ -7,6 +7,7 @@ import (
 
 	graphDriver "github.com/docker/docker/daemon/graphdriver"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/docker/docker/pkg/idtools"
 	graphPlugin "github.com/docker/go-plugins-helpers/graphdriver"
 )
 
@@ -24,9 +25,8 @@ func NewHandlerFromGraphDriver(init graphDriver.InitFunc) *graphPlugin.Handler {
 	return graphPlugin.NewHandler(&shimDriver{driver: nil, init: init})
 }
 
-func (d *shimDriver) Init(home string, options, uidMaps, gidMaps []string) error {
-	// FIXME(samoht): no way to pass UID and UID mapping?
-	driver, err := d.init(home, options, nil, nil)
+func (d *shimDriver) Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) error {
+	driver, err := d.init(home, options, uidMaps, gidMaps)
 	if err != nil {
 		return err
 	}

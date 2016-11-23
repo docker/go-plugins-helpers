@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/go-connections/sockets"
 )
 
@@ -212,7 +213,7 @@ type testPlugin struct {
 
 var _ Driver = &testPlugin{}
 
-func (p *testPlugin) Init(string, []string, []string, []string) error {
+func (p *testPlugin) Init(string, []string, []idtools.IDMap, []idtools.IDMap) error {
 	p.init++
 	return nil
 }

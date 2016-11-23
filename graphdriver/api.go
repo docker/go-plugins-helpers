@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/go-plugins-helpers/sdk"
 )
 
@@ -37,9 +38,9 @@ const (
 // InitRequest is the structure that docker's init requests are deserialized to.
 type InitRequest struct {
 	Home    string
-	Options []string `json:"Opts"`
-	UIDMaps []string `json:"UIDMaps"`
-	GIDMaps []string `json:"GIDMaps"`
+	Options []string        `json:"Opts"`
+	UIDMaps []idtools.IDMap `json:"UIDMaps"`
+	GIDMaps []idtools.IDMap `json:"GIDMaps"`
 }
 
 // InitResponse is the strucutre that docker's init responses are serialized to.
@@ -221,7 +222,7 @@ type DiffSizeResponse struct {
 
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
-	Init(home string, options []string, uidMaps []string, gidMaps []string) error
+	Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) error
 	Create(id, parent, mountlabel string, storageOpt map[string]string) error
 	CreateReadWrite(id, parent, mountlabel string, storageOpt map[string]string) error
 	Remove(id string) error
@@ -387,8 +388,9 @@ func (h *Handler) initMux() {
 		sdk.EncodeResponse(w, &ChangesResponse{Err: msg, Changes: changes}, msg)
 	})
 	h.HandleFunc(applyDiffPath, func(w http.ResponseWriter, r *http.Request) {
-		id := r.Header.Get("id")
-		parent := r.Header.Get("parent")
+		params := r.URL.Query()
+		id := params.Get("id")
+		parent := params.Get("parent")
 		size, err := h.driver.ApplyDiff(id, parent, r.Body)
 		msg := ""
 		if err != nil {
