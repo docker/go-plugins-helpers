@@ -16,7 +16,7 @@ const (
 	// DefaultDockerRootDirectory is the default directory where graph drivers will be created.
 	DefaultDockerRootDirectory = "/var/lib/docker/graph"
 
-	manifest        = `{"Implements": ["GraphDriver"]}`
+	driverName      = "GraphDriver"
 	initPath        = "/GraphDriver.Init"
 	createPath      = "/GraphDriver.Create"
 	createRWPath    = "/GraphDriver.CreateReadWrite"
@@ -238,27 +238,28 @@ type Driver interface {
 	DiffSize(id, parent string) (int64, error)
 }
 
-// Handler forwards requests and responses between the docker daemon and the plugin.
-type Handler struct {
-	driver Driver
-	sdk.Handler
-}
-
 // NewHandler initializes the request handler with a driver implementation.
-func NewHandler(driver Driver) *Handler {
-	h := &Handler{driver, sdk.NewHandler(manifest)}
-	h.initMux()
+func NewHandler(driver Driver) *sdk.Handler {
+	h := sdk.NewHandler()
+	RegisterDriver(driver, h)
 	return h
 }
 
-func (h *Handler) initMux() {
+// RegisterDriver registers the plugin to the SDK handler.
+func RegisterDriver(driver Driver, h *sdk.Handler) {
+	h.RegisterDriver(driverName, func(h *sdk.Handler) {
+		initMux(driver, h)
+	})
+}
+
+func initMux(driver Driver, h *sdk.Handler) {
 	h.HandleFunc(initPath, func(w http.ResponseWriter, r *http.Request) {
 		req := InitRequest{}
 		err := sdk.DecodeRequest(w, r, &req)
 		if err != nil {
 			return
 		}
-		err = h.driver.Init(req.Home, req.Options, req.UIDMaps, req.GIDMaps)
+		err = driver.Init(req.Home, req.Options, req.UIDMaps, req.GIDMaps)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -271,7 +272,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.Create(req.ID, req.Parent, req.MountLabel, req.StorageOpt)
+		err = driver.Create(req.ID, req.Parent, req.MountLabel, req.StorageOpt)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -284,7 +285,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.CreateReadWrite(req.ID, req.Parent, req.MountLabel, req.StorageOpt)
+		err = driver.CreateReadWrite(req.ID, req.Parent, req.MountLabel, req.StorageOpt)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -297,7 +298,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.Remove(req.ID)
+		err = driver.Remove(req.ID)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -311,7 +312,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		dir, err := h.driver.Get(req.ID, req.MountLabel)
+		dir, err := driver.Get(req.ID, req.MountLabel)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -324,7 +325,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.Put(req.ID)
+		err = driver.Put(req.ID)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -337,11 +338,11 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		exists := h.driver.Exists(req.ID)
+		exists := driver.Exists(req.ID)
 		sdk.EncodeResponse(w, &ExistsResponse{Exists: exists}, "")
 	})
 	h.HandleFunc(statusPath, func(w http.ResponseWriter, r *http.Request) {
-		status := h.driver.Status()
+		status := driver.Status()
 		sdk.EncodeResponse(w, &StatusResponse{Status: status}, "")
 	})
 	h.HandleFunc(getMetadataPath, func(w http.ResponseWriter, r *http.Request) {
@@ -350,7 +351,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		metadata, err := h.driver.GetMetadata(req.ID)
+		metadata, err := driver.GetMetadata(req.ID)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -358,7 +359,7 @@ func (h *Handler) initMux() {
 		sdk.EncodeResponse(w, &GetMetadataResponse{Err: msg, Metadata: metadata}, msg)
 	})
 	h.HandleFunc(cleanupPath, func(w http.ResponseWriter, r *http.Request) {
-		err := h.driver.Cleanup()
+		err := driver.Cleanup()
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -371,7 +372,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		stream := h.driver.Diff(req.ID, req.Parent)
+		stream := driver.Diff(req.ID, req.Parent)
 		sdk.StreamResponse(w, stream)
 	})
 	h.HandleFunc(changesPath, func(w http.ResponseWriter, r *http.Request) {
@@ -380,7 +381,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		changes, err := h.driver.Changes(req.ID, req.Parent)
+		changes, err := driver.Changes(req.ID, req.Parent)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -391,7 +392,7 @@ func (h *Handler) initMux() {
 		params := r.URL.Query()
 		id := params.Get("id")
 		parent := params.Get("parent")
-		size, err := h.driver.ApplyDiff(id, parent, r.Body)
+		size, err := driver.ApplyDiff(id, parent, r.Body)
 		msg := ""
 		if err != nil {
 			msg = err.Error()
@@ -404,7 +405,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		size, err := h.driver.DiffSize(req.ID, req.Parent)
+		size, err := driver.DiffSize(req.ID, req.Parent)
 		msg := ""
 		if err != nil {
 			msg = err.Error()

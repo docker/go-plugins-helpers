@@ -115,8 +115,8 @@ func TestActivate(t *testing.T) {
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
 
-	if string(body) != manifest+"\n" {
-		t.Fatalf("Expected %s, got %s\n", manifest+"\n", string(body))
+	if strings.Contains(string(body), driverName) {
+		t.Fatalf("Expected driver to implement %s, got %s\n", driverName, string(body))
 	}
 }
 

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	manifest = `{"Implements": ["NetworkDriver"]}`
+	driverName = "NetworkDriver"
 	// LocalScope is the correct scope response for a local scope driver
 	LocalScope = `local`
 	// GlobalScope is the correct scope response for a global scope driver
@@ -205,22 +205,23 @@ func NewErrorResponse(msg string) *ErrorResponse {
 	return &ErrorResponse{Err: msg}
 }
 
-// Handler forwards requests and responses between the docker daemon and the plugin.
-type Handler struct {
-	driver Driver
-	sdk.Handler
-}
-
 // NewHandler initializes the request handler with a driver implementation.
-func NewHandler(driver Driver) *Handler {
-	h := &Handler{driver, sdk.NewHandler(manifest)}
-	h.initMux()
+func NewHandler(driver Driver) *sdk.Handler {
+	h := sdk.NewHandler()
+	RegisterDriver(driver, h)
 	return h
 }
 
-func (h *Handler) initMux() {
+// RegisterDriver registers the plugin to the SDK handler.
+func RegisterDriver(driver Driver, h *sdk.Handler) {
+	h.RegisterDriver(driverName, func(h *sdk.Handler) {
+		initMux(driver, h)
+	})
+}
+
+func initMux(driver Driver, h *sdk.Handler) {
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
-		res, err := h.driver.GetCapabilities()
+		res, err := driver.GetCapabilities()
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -240,7 +241,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.CreateNetwork(req)
+		err = driver.CreateNetwork(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -255,7 +256,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		res, err := h.driver.AllocateNetwork(req)
+		res, err := driver.AllocateNetwork(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -269,7 +270,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.DeleteNetwork(req)
+		err = driver.DeleteNetwork(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -283,7 +284,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.FreeNetwork(req)
+		err = driver.FreeNetwork(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -297,7 +298,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		res, err := h.driver.CreateEndpoint(req)
+		res, err := driver.CreateEndpoint(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -311,7 +312,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.DeleteEndpoint(req)
+		err = driver.DeleteEndpoint(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -325,7 +326,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		res, err := h.driver.EndpointInfo(req)
+		res, err := driver.EndpointInfo(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -338,7 +339,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		res, err := h.driver.Join(req)
+		res, err := driver.Join(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -351,7 +352,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.Leave(req)
+		err = driver.Leave(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -365,7 +366,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.DiscoverNew(req)
+		err = driver.DiscoverNew(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -379,7 +380,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.DiscoverDelete(req)
+		err = driver.DiscoverDelete(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -393,7 +394,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.ProgramExternalConnectivity(req)
+		err = driver.ProgramExternalConnectivity(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -407,7 +408,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.driver.RevokeExternalConnectivity(req)
+		err = driver.RevokeExternalConnectivity(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
