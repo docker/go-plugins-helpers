@@ -40,14 +40,15 @@ func TestActivate(t *testing.T) {
 
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
+	manifest := &sdk.PluginManifest{}
+	json.NewDecoder(response.Body).Decode(manifest)
 
-	if err != nil {
-		t.Fatal(err)
+	if len(manifest.Implements) != 1 {
+		t.Fatalf("Expected %v, got %v", 1, len(manifest.Implements))
 	}
 
-	if string(body) != manifest+"\n" {
-		t.Fatalf("Expected %s, got %s\n", manifest+"\n", string(body))
+	if manifest.Implements[0] != pluginType {
+		t.Fatalf("Expected %s, got %s\n", pluginType, manifest.Implements[0])
 	}
 }
 

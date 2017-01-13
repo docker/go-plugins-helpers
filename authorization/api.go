@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	manifest = `{"Implements": ["` + authorization.AuthZApiImplements + `"]}`
-	reqPath  = "/" + authorization.AuthZApiRequest
-	resPath  = "/" + authorization.AuthZApiResponse
+	pluginType = authorization.AuthZApiImplements
+	reqPath    = "/" + authorization.AuthZApiRequest
+	resPath    = "/" + authorization.AuthZApiResponse
 )
 
 // Request is the structure that docker's requests are deserialized to.
@@ -34,24 +34,28 @@ type Handler struct {
 
 // NewHandler initializes the request handler with a plugin implementation.
 func NewHandler(plugin Plugin) *Handler {
-	h := &Handler{plugin, sdk.NewHandler(manifest)}
-	h.initMux()
+	h := &Handler{plugin, sdk.NewHandler()}
+	InitMux(h, plugin)
 	return h
 }
 
-func (h *Handler) initMux() {
-	h.handle(reqPath, func(req Request) Response {
-		return h.plugin.AuthZReq(req)
+// InitMux initializes a compatible HTTP mux with routes for the specified driver. Can be used
+// to combine multiple drivers into a single plugin mux.
+func InitMux(h sdk.Mux, plugin Plugin) {
+	handle(h, reqPath, func(req Request) Response {
+		return plugin.AuthZReq(req)
 	})
 
-	h.handle(resPath, func(req Request) Response {
-		return h.plugin.AuthZRes(req)
+	handle(h, resPath, func(req Request) Response {
+		return plugin.AuthZRes(req)
 	})
+
+	h.AddImplementation(pluginType)
 }
 
 type actionHandler func(Request) Response
 
-func (h *Handler) handle(name string, actionCall actionHandler) {
+func handle(h sdk.Mux, name string, actionCall actionHandler) {
 	h.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
 		var (
 			req Request
