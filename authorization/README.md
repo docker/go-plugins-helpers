@@ -28,7 +28,7 @@ This library is designed to be integrated in your program.
 
 ## Full example plugins
 
-- https://github.com/runcom/docker-novolume-plugin
+- https://github.com/projectatomic/docker-novolume-plugin
 
 ## License
 
