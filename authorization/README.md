@@ -29,6 +29,7 @@ This library is designed to be integrated in your program.
 ## Full example plugins
 
 - https://github.com/projectatomic/docker-novolume-plugin
+- https://github.com/cpdevws/img-authz-plugin
 
 ## License
 
