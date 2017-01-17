@@ -24,7 +24,7 @@ This library is designed to be integrated in your program.
   p := MyAuthZPlugin{}
   h := authorization.NewHandler(p)
   u, _ := user.Lookup("root")
-	gid, _ := strconv.Atoi(u.Gid)
+  gid, _ := strconv.Atoi(u.Gid)
   h.ServeUnix("test_plugin", gid)
 ```
 
