@@ -11,8 +11,10 @@ var (
 	errOnlySupportedOnWindows = errors.New("named pipe creation is only supported on Windows")
 )
 
-func newWindowsListener(address, pluginName string, pipeConfig *WindowsPipeConfig) func() (net.Listener, string, string, error) {
-	return func() (net.Listener, string, string, error) {
-		return nil, "", "", errOnlySupportedOnWindows
-	}
+func newWindowsListener(address, pluginName string, pipeConfig *WindowsPipeConfig) (net.Listener, string, error) {
+	return nil, "", errOnlySupportedOnWindows
+}
+
+func windowsCreateDirectory(name string) error {
+	return nil
 }

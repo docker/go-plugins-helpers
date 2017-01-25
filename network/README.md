@@ -42,7 +42,7 @@ h := network.NewHandler(d)
 config := sdk.WindowsPipeConfig{
   // open, read, write permissions for everyone 
   // (uses Windows Security Descriptor Definition Language)
-  SecurityDescriptor: "S:(ML;;NW;;;LW)D:(A;;0x12019f;;;WD)",
+  SecurityDescriptor: AllowServiceSystemAdmin,
   InBufferSize:       4096,
   OutBufferSize:      4096,
 }

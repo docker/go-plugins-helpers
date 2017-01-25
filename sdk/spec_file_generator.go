@@ -19,13 +19,16 @@ func writeSpec(name, address string, proto protocol) (string, error) {
 	var pluginSpecDir string
 	if runtime.GOOS == "windows" {
 		pluginSpecDir = ([]string{filepath.Join(os.Getenv("programdata"), "docker", "plugins")})[0]
+		if err := windowsCreateDirectory(pluginSpecDir); err != nil {
+			return "", err
+		}
 	} else {
 		pluginSpecDir = "/etc/docker/plugins"
+		if err := os.MkdirAll(pluginSpecDir, 0755); err != nil {
+			return "", err
+		}
 	}
 
-	if err := os.MkdirAll(pluginSpecDir, 0755); err != nil {
-		return "", err
-	}
 	spec := filepath.Join(pluginSpecDir, name+".spec")
 
 	url := string(proto) + "://" + address
