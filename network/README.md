@@ -9,6 +9,8 @@ This library is designed to be integrated in your program.
 1. Implement the `network.Driver` interface.
 2. Initialize a `network.Handler` with your implementation.
 3. Call either `ServeTCP`, `ServeUnix` or `ServeWindows` from the `network.Handler`.
+4. On Windows, docker daemon data dir must be provided for ServeTCP and ServeWindows functions.
+However, providing an empty string will use the default value.
 
 ### Example using TCP sockets:
 
@@ -17,7 +19,7 @@ This library is designed to be integrated in your program.
 
   d := MyNetworkDriver{}
   h := network.NewHandler(d)
-  h.ServeTCP("test_network", ":8080")
+  h.ServeTCP("test_network", ":8080", "")
 ```
 
 ### Example using Unix sockets:
@@ -47,7 +49,7 @@ config := sdk.WindowsPipeConfig{
   OutBufferSize:      4096,
 }
 
-h.ServeWindows("//./pipe/testpipe", "test_network", &config)
+h.ServeWindows("//./pipe/testpipe", "test_network", "", &config)
 ```
 
 ## Full example plugins

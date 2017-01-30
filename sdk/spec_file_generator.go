@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
 )
 
 type protocol string
@@ -14,27 +13,37 @@ const (
 	protoNamedPipe protocol = "npipe"
 )
 
-func writeSpec(name, address string, proto protocol) (string, error) {
+// PluginSpecDir returns plugin spec dir in relation to daemon root directory.
+func PluginSpecDir(daemonRoot string) string {
+	return ([]string{filepath.Join(daemonRoot, "plugins")})[0]
+}
 
-	var pluginSpecDir string
-	if runtime.GOOS == "windows" {
-		pluginSpecDir = ([]string{filepath.Join(os.Getenv("programdata"), "docker", "plugins")})[0]
-		if err := windowsCreateDirectory(pluginSpecDir); err != nil {
-			return "", err
-		}
-	} else {
-		pluginSpecDir = "/etc/docker/plugins"
-		if err := os.MkdirAll(pluginSpecDir, 0755); err != nil {
-			return "", err
-		}
+func createPluginSpecDirWindows(name, address, daemonRoot string) (string, error) {
+	if daemonRoot == "" {
+		daemonRoot = filepath.Join(os.Getenv("programdata"), "docker")
 	}
+	pluginSpecDir := PluginSpecDir(daemonRoot)
+	if err := windowsCreateDirectoryWithACL(pluginSpecDir); err != nil {
+		return "", err
+	}
+	return pluginSpecDir, nil
+}
 
-	spec := filepath.Join(pluginSpecDir, name+".spec")
+func createPluginSpecDirUnix(name, address string) (string, error) {
+	pluginSpecDir := PluginSpecDir("/etc/docker")
+	if err := os.MkdirAll(pluginSpecDir, 0755); err != nil {
+		return "", err
+	}
+	return pluginSpecDir, nil
+}
+
+func writeSpecFile(name, address, pluginSpecDir string, proto protocol) (string, error) {
+	specFileDir := filepath.Join(pluginSpecDir, name+".spec")
 
 	url := string(proto) + "://" + address
-	if err := ioutil.WriteFile(spec, []byte(url), 0644); err != nil {
+	if err := ioutil.WriteFile(specFileDir, []byte(url), 0644); err != nil {
 		return "", err
 	}
 
-	return spec, nil
+	return specFileDir, nil
 }

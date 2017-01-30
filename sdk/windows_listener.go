@@ -21,7 +21,7 @@ const (
 	AllowServiceSystemAdmin = "D:(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;FA;;;LA)(A;ID;FA;;;LS)"
 )
 
-func newWindowsListener(address, pluginName string, pipeConfig *WindowsPipeConfig) (net.Listener, string, error) {
+func newWindowsListener(address, pluginName, daemonRoot string, pipeConfig *WindowsPipeConfig) (net.Listener, string, error) {
 	winioPipeConfig := winio.PipeConfig{
 		SecurityDescriptor: pipeConfig.SecurityDescriptor,
 		InputBufferSize:    pipeConfig.InBufferSize,
@@ -31,14 +31,22 @@ func newWindowsListener(address, pluginName string, pipeConfig *WindowsPipeConfi
 	if err != nil {
 		return nil, "", err
 	}
-	spec, err := writeSpec(pluginName, listener.Addr().String(), protoNamedPipe)
+
+	addr := listener.Addr().String()
+
+	specDir, err := createPluginSpecDirWindows(pluginName, addr, daemonRoot)
+	if err != nil {
+		return nil, "", err
+	}
+
+	spec, err := writeSpecFile(pluginName, addr, specDir, protoNamedPipe)
 	if err != nil {
 		return nil, "", err
 	}
 	return listener, spec, nil
 }
 
-func windowsCreateDirectory(name string) error {
+func windowsCreateDirectoryWithACL(name string) error {
 	sa := syscall.SecurityAttributes{Length: 0}
 	sddl := "D:P(A;OICI;GA;;;BA)(A;OICI;GA;;;SY)"
 	sd, err := winio.SddlToSecurityDescriptor(sddl)
