@@ -1,6 +1,7 @@
 package sdk
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -18,11 +19,19 @@ func PluginSpecDir(daemonRoot string) string {
 	return ([]string{filepath.Join(daemonRoot, "plugins")})[0]
 }
 
+// WindowsDefaultDaemonRootDir returns default data directory of docker daemon on Windows.
+func WindowsDefaultDaemonRootDir() string {
+	return filepath.Join(os.Getenv("programdata"), "docker")
+}
+
 func createPluginSpecDirWindows(name, address, daemonRoot string) (string, error) {
-	if daemonRoot == "" {
-		daemonRoot = filepath.Join(os.Getenv("programdata"), "docker")
+	_, err := os.Stat(daemonRoot)
+	if os.IsNotExist(err) {
+		return "", fmt.Errorf("Deamon root directory must already exist: %s", err)
 	}
+
 	pluginSpecDir := PluginSpecDir(daemonRoot)
+
 	if err := windowsCreateDirectoryWithACL(pluginSpecDir); err != nil {
 		return "", err
 	}

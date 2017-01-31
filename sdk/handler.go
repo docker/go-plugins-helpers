@@ -40,8 +40,8 @@ func (h Handler) Serve(l net.Listener) error {
 // ServeTCP makes the handler to listen for request in a given TCP address.
 // It also writes the spec file in the right directory for docker to read.
 // Due to constrains for running Docker in Docker on Windows, data-root directory
-// of docker daemon must be provided. Providing an empty string ("") will be interpreted
-// as using the default directory. On Unix, this parameter is ignored.
+// of docker daemon must be provided. To get default directory, use
+// WindowsDefaultDaemonRootDir() function. On Unix, this parameter is ignored.
 func (h Handler) ServeTCP(pluginName, addr, daemonDir string, tlsConfig *tls.Config) error {
 	l, spec, err := newTCPListener(addr, pluginName, daemonDir, tlsConfig)
 	if err != nil {
@@ -69,8 +69,8 @@ func (h Handler) ServeUnix(addr string, gid int) error {
 // ServeWindows makes the handler to listen for request in a Windows named pipe.
 // It also creates the spec file in the right directory for docker to read.
 // Due to constrains for running Docker in Docker on Windows, data-root directory
-// of docker daemon must be provided. Providing an empty string ("") will be interpreted
-// as using the default directory.
+// of docker daemon must be provided. To get default directory, use
+// WindowsDefaultDaemonRootDir() function. On Unix, this parameter is ignored.
 func (h Handler) ServeWindows(addr, pluginName, daemonDir string, pipeConfig *WindowsPipeConfig) error {
 	l, spec, err := newWindowsListener(addr, pluginName, daemonDir, pipeConfig)
 	if err != nil {
