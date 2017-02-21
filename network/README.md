@@ -27,7 +27,7 @@ This library is designed to be integrated in your program.
 
   d := MyNetworkDriver{}
   h := network.NewHandler(d)
-  h.ServeUnix("root", "test_network")
+  h.ServeUnix("test_network", 0)
 ```
 
 ## Full example plugins
