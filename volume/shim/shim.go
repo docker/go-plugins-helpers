@@ -18,21 +18,17 @@ func NewHandlerFromVolumeDriver(d volume.Driver) *volumeplugin.Handler {
 	return volumeplugin.NewHandler(&shimDriver{d})
 }
 
-func (d *shimDriver) Create(req volumeplugin.Request) volumeplugin.Response {
-	var res volumeplugin.Response
+func (d *shimDriver) Create(req *volumeplugin.CreateRequest) error {
 	_, err := d.d.Create(req.Name, req.Options)
-	if err != nil {
-		res.Err = err.Error()
-	}
-	return res
+	return err
 }
 
-func (d *shimDriver) List(req volumeplugin.Request) volumeplugin.Response {
-	var res volumeplugin.Response
+func (d *shimDriver) List() (*volumeplugin.ListResponse, error) {
+	var res *volumeplugin.ListResponse
 	ls, err := d.d.List()
 	if err != nil {
 		res.Err = err.Error()
-		return res
+		return &volumeplugin.ListResponse{}, err
 	}
 	vols := make([]*volumeplugin.Volume, len(ls))
 
@@ -44,78 +40,74 @@ func (d *shimDriver) List(req volumeplugin.Request) volumeplugin.Response {
 		vols[i] = vol
 	}
 	res.Volumes = vols
-	return res
+	return res, nil
 }
 
-func (d *shimDriver) Get(req volumeplugin.Request) volumeplugin.Response {
-	var res volumeplugin.Response
+func (d *shimDriver) Get(req *volumeplugin.GetRequest) (*volumeplugin.GetResponse, error) {
+	var res *volumeplugin.GetResponse
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
-		return res
+		return &volumeplugin.GetResponse{}, err
 	}
 	res.Volume = &volumeplugin.Volume{
 		Name:       v.Name(),
 		Mountpoint: v.Path(),
 		Status:     v.Status(),
 	}
-	return res
+	return &volumeplugin.GetResponse{}, nil
 }
 
-func (d *shimDriver) Remove(req volumeplugin.Request) volumeplugin.Response {
-	var res volumeplugin.Response
+func (d *shimDriver) Remove(req *volumeplugin.RemoveRequest) error {
 	v, err := d.d.Get(req.Name)
 	if err != nil {
-		res.Err = err.Error()
-		return res
+		return err
 	}
 	if err := d.d.Remove(v); err != nil {
-		res.Err = err.Error()
+		return err
 	}
-	return res
+	return nil
 }
 
-func (d *shimDriver) Path(req volumeplugin.Request) volumeplugin.Response {
-	var res volumeplugin.Response
+func (d *shimDriver) Path(req *volumeplugin.PathRequest) (*volumeplugin.PathResponse, error) {
+	var res *volumeplugin.PathResponse
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
-		return res
+		return res, err
 	}
 	res.Mountpoint = v.Path()
-	return res
+	return res, nil
 }
 
-func (d *shimDriver) Mount(req volumeplugin.MountRequest) volumeplugin.Response {
-	var res volumeplugin.Response
+func (d *shimDriver) Mount(req *volumeplugin.MountRequest) (*volumeplugin.MountResponse, error) {
+	var res *volumeplugin.MountResponse
 	v, err := d.d.Get(req.Name)
 	if err != nil {
 		res.Err = err.Error()
-		return res
+		return res, err
 	}
 	pth, err := v.Mount(req.ID)
 	if err != nil {
 		res.Err = err.Error()
 	}
 	res.Mountpoint = pth
-	return res
+	return res, nil
 }
 
-func (d *shimDriver) Unmount(req volumeplugin.UnmountRequest) volumeplugin.Response {
-	var res volumeplugin.Response
+func (d *shimDriver) Unmount(req *volumeplugin.UnmountRequest) error {
 	v, err := d.d.Get(req.Name)
 	if err != nil {
-		res.Err = err.Error()
-		return res
+		return err
 	}
 	if err := v.Unmount(req.ID); err != nil {
-		res.Err = err.Error()
+		return err
 	}
-	return res
+	return nil
 }
 
-func (d *shimDriver) Capabilities(req volumeplugin.Request) volumeplugin.Response {
-	var res volumeplugin.Response
+func (d *shimDriver) Capabilities() *volumeplugin.CapabilitiesResponse {
+	var res *volumeplugin.CapabilitiesResponse
 	res.Capabilities = volumeplugin.Capability{Scope: d.d.Scope()}
 	return res
 }
