@@ -106,9 +106,6 @@ func TestHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resp.Err != "" {
-		t.Fatalf("got error removing volume: %s", resp.Err)
-	}
 	if p.capabilities != 1 {
 		t.Fatalf("expected remove 1, got %d", p.capabilities)
 	}

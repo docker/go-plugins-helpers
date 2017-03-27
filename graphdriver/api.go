@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 
+	graphDriver "github.com/docker/docker/daemon/graphdriver"
 	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/go-plugins-helpers/sdk"
 )
@@ -16,21 +17,22 @@ const (
 	// DefaultDockerRootDirectory is the default directory where graph drivers will be created.
 	DefaultDockerRootDirectory = "/var/lib/docker/graph"
 
-	manifest        = `{"Implements": ["GraphDriver"]}`
-	initPath        = "/GraphDriver.Init"
-	createPath      = "/GraphDriver.Create"
-	createRWPath    = "/GraphDriver.CreateReadWrite"
-	removePath      = "/GraphDriver.Remove"
-	getPath         = "/GraphDriver.Get"
-	putPath         = "/GraphDriver.Put"
-	existsPath      = "/GraphDriver.Exists"
-	statusPath      = "/GraphDriver.Status"
-	getMetadataPath = "/GraphDriver.GetMetadata"
-	cleanupPath     = "/GraphDriver.Cleanup"
-	diffPath        = "/GraphDriver.Diff"
-	changesPath     = "/GraphDriver.Changes"
-	applyDiffPath   = "/GraphDriver.ApplyDiff"
-	diffSizePath    = "/GraphDriver.DiffSize"
+	manifest         = `{"Implements": ["GraphDriver"]}`
+	initPath         = "/GraphDriver.Init"
+	createPath       = "/GraphDriver.Create"
+	createRWPath     = "/GraphDriver.CreateReadWrite"
+	removePath       = "/GraphDriver.Remove"
+	getPath          = "/GraphDriver.Get"
+	putPath          = "/GraphDriver.Put"
+	existsPath       = "/GraphDriver.Exists"
+	statusPath       = "/GraphDriver.Status"
+	getMetadataPath  = "/GraphDriver.GetMetadata"
+	cleanupPath      = "/GraphDriver.Cleanup"
+	diffPath         = "/GraphDriver.Diff"
+	changesPath      = "/GraphDriver.Changes"
+	applyDiffPath    = "/GraphDriver.ApplyDiff"
+	diffSizePath     = "/GraphDriver.DiffSize"
+	capabilitiesPath = "/GraphDriver.Capabilities"
 )
 
 // Init
@@ -220,6 +222,14 @@ type DiffSizeResponse struct {
 	Err  string
 }
 
+// CapabilitiesRequest is the structure that docker's capabilities requests are deserialized to.
+type CapabilitiesRequest struct{}
+
+// CapabilitiesResponse is the structure that docker's capabilities responses are serialized to.
+type CapabilitiesResponse struct {
+	Capabilities graphDriver.Capabilities
+}
+
 // Driver represent the interface a driver must fulfill.
 type Driver interface {
 	Init(home string, options []string, uidMaps, gidMaps []idtools.IDMap) error
@@ -236,6 +246,7 @@ type Driver interface {
 	Changes(id, parent string) ([]Change, error)
 	ApplyDiff(id, parent string, archive io.Reader) (int64, error)
 	DiffSize(id, parent string) (int64, error)
+	Capabilities() graphDriver.Capabilities
 }
 
 // Handler forwards requests and responses between the docker daemon and the plugin.
@@ -410,6 +421,10 @@ func (h *Handler) initMux() {
 			msg = err.Error()
 		}
 		sdk.EncodeResponse(w, &DiffSizeResponse{Err: msg, Size: size}, msg)
+	})
+	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
+		caps := h.driver.Capabilities()
+		sdk.EncodeResponse(w, &CapabilitiesResponse{Capabilities: caps}, "")
 	})
 }
 
@@ -679,6 +694,26 @@ func CallDiffSize(url string, client *http.Client, req DiffSizeRequest) (*DiffSi
 		return nil, err
 	}
 	var vResp DiffSizeResponse
+	err = json.NewDecoder(resp.Body).Decode(&vResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &vResp, nil
+}
+
+// CallCapabilities is the raw call to the Graphdriver.Capabilities method
+func CallCapabilities(url string, client *http.Client, req CapabilitiesRequest) (*CapabilitiesResponse, error) {
+	method := capabilitiesPath
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var vResp CapabilitiesResponse
 	err = json.NewDecoder(resp.Body).Decode(&vResp)
 	if err != nil {
 		return nil, err
