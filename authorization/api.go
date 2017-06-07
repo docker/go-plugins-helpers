@@ -9,9 +9,8 @@ import (
 )
 
 const (
-	manifest = `{"Implements": ["` + authorization.AuthZApiImplements + `"]}`
-	reqPath  = "/" + authorization.AuthZApiRequest
-	resPath  = "/" + authorization.AuthZApiResponse
+	reqPath = "/" + authorization.AuthZApiRequest
+	resPath = "/" + authorization.AuthZApiResponse
 )
 
 // Request is the structure that docker's requests are deserialized to.
@@ -26,32 +25,33 @@ type Plugin interface {
 	AuthZRes(Request) Response
 }
 
-// Handler forwards requests and responses between the docker daemon and the plugin.
-type Handler struct {
-	plugin Plugin
-	sdk.Handler
-}
-
 // NewHandler initializes the request handler with a plugin implementation.
-func NewHandler(plugin Plugin) *Handler {
-	h := &Handler{plugin, sdk.NewHandler(manifest)}
-	h.initMux()
+func NewHandler(plugin Plugin) *sdk.Handler {
+	h := sdk.NewHandler()
+	RegisterDriver(plugin, h)
 	return h
 }
 
-func (h *Handler) initMux() {
-	h.handle(reqPath, func(req Request) Response {
-		return h.plugin.AuthZReq(req)
+// RegisterDriver registers the plugin to the SDK handler.
+func RegisterDriver(plugin Plugin, h *sdk.Handler) {
+	h.RegisterDriver(authorization.AuthZApiImplements, func(h *sdk.Handler) {
+		initMux(plugin, h)
+	})
+}
+
+func initMux(plugin Plugin, h *sdk.Handler) {
+	handle(h, reqPath, func(req Request) Response {
+		return plugin.AuthZReq(req)
 	})
 
-	h.handle(resPath, func(req Request) Response {
-		return h.plugin.AuthZRes(req)
+	handle(h, resPath, func(req Request) Response {
+		return plugin.AuthZRes(req)
 	})
 }
 
 type actionHandler func(Request) Response
 
-func (h *Handler) handle(name string, actionCall actionHandler) {
+func handle(h *sdk.Handler, name string, actionCall actionHandler) {
 	h.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
 		var (
 			req Request

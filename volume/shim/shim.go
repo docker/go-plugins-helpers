@@ -2,6 +2,7 @@ package shim
 
 import (
 	"github.com/docker/docker/volume"
+	"github.com/docker/go-plugins-helpers/sdk"
 	volumeplugin "github.com/docker/go-plugins-helpers/volume"
 )
 
@@ -14,7 +15,7 @@ type shimDriver struct {
 // to Docker Engine and it would create a plugin from it that maps plugin API calls
 // directly to any volume driver that satifies the volume.Driver interface from
 // Docker Engine.
-func NewHandlerFromVolumeDriver(d volume.Driver) *volumeplugin.Handler {
+func NewHandlerFromVolumeDriver(d volume.Driver) *sdk.Handler {
 	return volumeplugin.NewHandler(&shimDriver{d})
 }
 

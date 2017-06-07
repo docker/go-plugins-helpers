@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/docker/docker/pkg/authorization"
 	"github.com/docker/go-plugins-helpers/sdk"
 )
 
@@ -46,8 +47,8 @@ func TestActivate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if string(body) != manifest+"\n" {
-		t.Fatalf("Expected %s, got %s\n", manifest+"\n", string(body))
+	if !strings.Contains(string(body), authorization.AuthZApiImplements) {
+		t.Fatalf("Expected driver to implement %s, got %s\n", authorization.AuthZApiImplements, string(body))
 	}
 }
 

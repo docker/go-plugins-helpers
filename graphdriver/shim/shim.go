@@ -9,6 +9,7 @@ import (
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/idtools"
 	graphPlugin "github.com/docker/go-plugins-helpers/graphdriver"
+	"github.com/docker/go-plugins-helpers/sdk"
 )
 
 type shimDriver struct {
@@ -21,7 +22,7 @@ type shimDriver struct {
 // built-in to Docker Engine and it would create a plugin from it that maps
 // plugin API calls directly to any volume driver that satifies the
 // graphdriver.Driver interface from Docker Engine.
-func NewHandlerFromGraphDriver(init graphDriver.InitFunc) *graphPlugin.Handler {
+func NewHandlerFromGraphDriver(init graphDriver.InitFunc) *sdk.Handler {
 	return graphPlugin.NewHandler(&shimDriver{driver: nil, init: init})
 }
 

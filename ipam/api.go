@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	manifest = `{"Implements": ["IpamDriver"]}`
+	driverName = "IpamDriver"
 
 	capabilitiesPath   = "/IpamDriver.GetCapabilities"
 	addressSpacesPath  = "/IpamDriver.GetDefaultAddressSpaces"
@@ -88,22 +88,23 @@ func NewErrorResponse(msg string) *ErrorResponse {
 	return &ErrorResponse{Err: msg}
 }
 
-// Handler forwards requests and responses between the docker daemon and the plugin.
-type Handler struct {
-	ipam Ipam
-	sdk.Handler
-}
-
 // NewHandler initializes the request handler with a driver implementation.
-func NewHandler(ipam Ipam) *Handler {
-	h := &Handler{ipam, sdk.NewHandler(manifest)}
-	h.initMux()
+func NewHandler(ipam Ipam) *sdk.Handler {
+	h := sdk.NewHandler()
+	RegisterDriver(ipam, h)
 	return h
 }
 
-func (h *Handler) initMux() {
+// RegisterDriver registers the plugin to the SDK handler.
+func RegisterDriver(ipam Ipam, h *sdk.Handler) {
+	h.RegisterDriver(driverName, func(h *sdk.Handler) {
+		initMux(ipam, h)
+	})
+}
+
+func initMux(ipam Ipam, h *sdk.Handler) {
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
-		res, err := h.ipam.GetCapabilities()
+		res, err := ipam.GetCapabilities()
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -112,7 +113,7 @@ func (h *Handler) initMux() {
 		sdk.EncodeResponse(w, res, "")
 	})
 	h.HandleFunc(addressSpacesPath, func(w http.ResponseWriter, r *http.Request) {
-		res, err := h.ipam.GetDefaultAddressSpaces()
+		res, err := ipam.GetDefaultAddressSpaces()
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -126,7 +127,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		res, err := h.ipam.RequestPool(req)
+		res, err := ipam.RequestPool(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -140,7 +141,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.ipam.ReleasePool(req)
+		err = ipam.ReleasePool(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -154,7 +155,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		res, err := h.ipam.RequestAddress(req)
+		res, err := ipam.RequestAddress(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
@@ -168,7 +169,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			return
 		}
-		err = h.ipam.ReleaseAddress(req)
+		err = ipam.ReleaseAddress(req)
 		if err != nil {
 			msg := err.Error()
 			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
