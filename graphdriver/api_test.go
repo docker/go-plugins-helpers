@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"testing"
 
+	graphDriver "github.com/docker/docker/daemon/graphdriver"
 	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/go-connections/sockets"
 )
@@ -192,23 +193,36 @@ func TestHandler(t *testing.T) {
 	if p.diffSize != 1 {
 		t.Fatalf("expected diffSize 1, got %d", p.diffSize)
 	}
+
+	// Capabilities
+	caps, err := CallCapabilities(url, client, CapabilitiesRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if caps.Capabilities.ReproducesExactDiffs != true {
+		t.Fatalf("got error getting capabilities for graph drivers: %v", caps.Capabilities)
+	}
+	if p.capabilities != 1 {
+		t.Fatalf("expected get 1, got %d", p.get)
+	}
 }
 
 type testPlugin struct {
-	init        int
-	create      int
-	createRW    int
-	remove      int
-	get         int
-	put         int
-	exists      int
-	status      int
-	getMetadata int
-	cleanup     int
-	diff        int
-	changes     int
-	applyDiff   int
-	diffSize    int
+	init         int
+	create       int
+	createRW     int
+	remove       int
+	get          int
+	put          int
+	exists       int
+	status       int
+	getMetadata  int
+	cleanup      int
+	diff         int
+	changes      int
+	applyDiff    int
+	diffSize     int
+	capabilities int
 }
 
 var _ Driver = &testPlugin{}
@@ -283,4 +297,9 @@ func (p *testPlugin) ApplyDiff(string, string, io.Reader) (int64, error) {
 func (p *testPlugin) DiffSize(string, string) (int64, error) {
 	p.diffSize++
 	return 42, nil
+}
+
+func (p *testPlugin) Capabilities() graphDriver.Capabilities {
+	p.capabilities++
+	return graphDriver.Capabilities{ReproducesExactDiffs: true}
 }

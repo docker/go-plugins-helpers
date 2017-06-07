@@ -163,3 +163,13 @@ func (d *shimDriver) DiffSize(id, parent string) (int64, error) {
 	}
 	return d.driver.DiffSize(id, parent)
 }
+
+func (d *shimDriver) Capabilities() graphDriver.Capabilities {
+	if d == nil {
+		return graphDriver.Capabilities{}
+	}
+	if capDriver, ok := d.driver.(graphDriver.CapabilityDriver); ok {
+		return capDriver.Capabilities()
+	}
+	return graphDriver.Capabilities{}
+}

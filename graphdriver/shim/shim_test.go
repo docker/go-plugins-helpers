@@ -47,6 +47,9 @@ func (t *testGraphDriver) GetMetadata(id string) (map[string]string, error) {
 func (t *testGraphDriver) Cleanup() error {
 	return nil
 }
+func (t *testGraphDriver) Capabilities() graphdriver.Capabilities {
+	return graphdriver.Capabilities{}
+}
 
 func Init(root string, options []string, uidMaps, gidMaps []idtools.IDMap) (graphdriver.Driver, error) {
 	d := graphdriver.NewNaiveDiffDriver(&testGraphDriver{}, uidMaps, gidMaps)
