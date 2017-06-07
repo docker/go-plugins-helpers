@@ -10,7 +10,7 @@ const (
 	// DefaultDockerRootDirectory is the default directory where volumes will be created.
 	DefaultDockerRootDirectory = "/var/lib/docker-volumes"
 
-	manifest         = `{"Implements": ["VolumeDriver"]}`
+	pluginType       = "VolumeDriver"
 	createPath       = "/VolumeDriver.Create"
 	getPath          = "/VolumeDriver.Get"
 	listPath         = "/VolumeDriver.List"
@@ -84,45 +84,49 @@ type unmountActionHandler func(UnmountRequest) Response
 
 // NewHandler initializes the request handler with a driver implementation.
 func NewHandler(driver Driver) *Handler {
-	h := &Handler{driver, sdk.NewHandler(manifest)}
-	h.initMux()
+	h := &Handler{driver, sdk.NewHandler()}
+	InitMux(h, driver)
 	return h
 }
 
-func (h *Handler) initMux() {
-	h.handle(createPath, func(req Request) Response {
-		return h.driver.Create(req)
+// InitMux initializes a compatible HTTP mux with routes for the specified driver. Can be used
+// to combine multiple drivers into a single plugin mux.
+func InitMux(h sdk.Mux, driver Driver) {
+	handle(h, createPath, func(req Request) Response {
+		return driver.Create(req)
 	})
 
-	h.handle(getPath, func(req Request) Response {
-		return h.driver.Get(req)
+	handle(h, getPath, func(req Request) Response {
+		return driver.Get(req)
 	})
 
-	h.handle(listPath, func(req Request) Response {
-		return h.driver.List(req)
+	handle(h, listPath, func(req Request) Response {
+		return driver.List(req)
 	})
 
-	h.handle(removePath, func(req Request) Response {
-		return h.driver.Remove(req)
+	handle(h, removePath, func(req Request) Response {
+		return driver.Remove(req)
 	})
 
-	h.handle(hostVirtualPath, func(req Request) Response {
-		return h.driver.Path(req)
+	handle(h, hostVirtualPath, func(req Request) Response {
+		return driver.Path(req)
 	})
 
-	h.handleMount(mountPath, func(req MountRequest) Response {
-		return h.driver.Mount(req)
+	handleMount(h, mountPath, func(req MountRequest) Response {
+		return driver.Mount(req)
 	})
 
-	h.handleUnmount(unmountPath, func(req UnmountRequest) Response {
-		return h.driver.Unmount(req)
+	handleUnmount(h, unmountPath, func(req UnmountRequest) Response {
+		return driver.Unmount(req)
 	})
-	h.handle(capabilitiesPath, func(req Request) Response {
-		return h.driver.Capabilities(req)
+	handle(h, capabilitiesPath, func(req Request) Response {
+		return driver.Capabilities(req)
 	})
+
+	h.AddImplementation(pluginType)
 }
 
-func (h *Handler) handle(name string, actionCall actionHandler) {
+func handle(h sdk.Mux, name string, actionCall actionHandler) {
 	h.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
 		var req Request
 		if err := sdk.DecodeRequest(w, r, &req); err != nil {
@@ -135,7 +139,7 @@ func (h *Handler) handle(name string, actionCall actionHandler) {
 	})
 }
 
-func (h *Handler) handleMount(name string, actionCall mountActionHandler) {
+func handleMount(h sdk.Mux, name string, actionCall mountActionHandler) {
 	h.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
 		var req MountRequest
 		if err := sdk.DecodeRequest(w, r, &req); err != nil {
@@ -147,7 +151,7 @@ func (h *Handler) handleMount(name string, actionCall mountActionHandler) {
 	})
 }
 
-func (h *Handler) handleUnmount(name string, actionCall unmountActionHandler) {
+func handleUnmount(h sdk.Mux, name string, actionCall unmountActionHandler) {
 	h.HandleFunc(name, func(w http.ResponseWriter, r *http.Request) {
 		var req UnmountRequest
 		if err := sdk.DecodeRequest(w, r, &req); err != nil {

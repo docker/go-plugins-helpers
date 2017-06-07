@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"encoding/json"
 	"github.com/docker/go-plugins-helpers/sdk"
 )
 
@@ -113,10 +114,16 @@ func TestActivate(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
 
-	if string(body) != manifest+"\n" {
-		t.Fatalf("Expected %s, got %s\n", manifest+"\n", string(body))
+	manifest := &sdk.PluginManifest{}
+	json.NewDecoder(response.Body).Decode(manifest)
+
+	if len(manifest.Implements) != 1 {
+		t.Fatalf("Expected %v, got %v", 1, len(manifest.Implements))
+	}
+
+	if manifest.Implements[0] != pluginType {
+		t.Fatalf("Expected %s, got %s\n", pluginType, manifest.Implements[0])
 	}
 }
 
