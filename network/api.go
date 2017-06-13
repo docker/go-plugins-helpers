@@ -50,7 +50,8 @@ type Driver interface {
 
 // CapabilitiesResponse returns whether or not this network is global or local
 type CapabilitiesResponse struct {
-	Scope string
+	Scope             string
+	ConnectivityScope string
 }
 
 // AllocateNetworkRequest requests allocation of new network by manager
