@@ -33,6 +33,7 @@ This library is designed to be integrated in your program.
 - https://github.com/projectatomic/docker-novolume-plugin
 - https://github.com/cpdevws/img-authz-plugin
 - https://github.com/casbin/casbin-authz-plugin
+- https://github.com/kassisol/hbm
 
 ## License
 
