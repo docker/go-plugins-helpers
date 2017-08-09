@@ -17,7 +17,7 @@ test:
 install-deps:
 	@echo "+ $@"
 	@go get -u github.com/golang/lint/golint
-	@go get -d ./...
+	@go get -d -t ./...
 
 lint:
 	@echo "+ $@"
