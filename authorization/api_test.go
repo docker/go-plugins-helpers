@@ -132,7 +132,7 @@ func TestAuthZRes(t *testing.T) {
 func TestMain(m *testing.M) {
 	d := &TestPlugin{}
 	h := NewHandler(d)
-	go h.ServeTCP("test", ":32456", nil)
+	go h.ServeTCP("test", ":32456", "", nil)
 
 	os.Exit(m.Run())
 }
