@@ -3,6 +3,8 @@ package volume
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"testing"
 
@@ -21,52 +23,52 @@ func TestHandler(t *testing.T) {
 	}}
 
 	// Create
-	resp, err := pluginRequest(client, createPath, Request{Name: "foo"})
+	_, err := pluginRequest(client, createPath, &CreateRequest{Name: "foo"})
+
 	if err != nil {
 		t.Fatal(err)
-	}
-	if resp.Err != "" {
-		t.Fatalf("error while creating volume: %v", err)
 	}
 	if p.create != 1 {
 		t.Fatalf("expected create 1, got %d", p.create)
 	}
 
 	// Get
-	resp, err = pluginRequest(client, getPath, Request{Name: "foo"})
-	if err != nil {
+	resp, err := pluginRequest(client, getPath, &GetRequest{Name: "foo"})
+	var gResp *GetResponse
+	if err := json.NewDecoder(resp).Decode(&gResp); err != nil {
 		t.Fatal(err)
 	}
-	if resp.Err != "" {
-		t.Fatalf("got error getting volume: %s", resp.Err)
+	if gResp.Err != "" {
+		t.Fatalf("got error getting volume: %s", gResp.Err)
 	}
-	if resp.Volume.Name != "foo" {
-		t.Fatalf("expected volume `foo`, got %v", resp.Volume)
+	if gResp.Volume.Name != "foo" {
+		t.Fatalf("expected volume `foo`, got %v", gResp.Volume)
 	}
 	if p.get != 1 {
 		t.Fatalf("expected get 1, got %d", p.get)
 	}
 
 	// List
-	resp, err = pluginRequest(client, listPath, Request{Name: "foo"})
-	if err != nil {
+	resp, err = pluginRequest(client, listPath, nil)
+	var lResp *ListResponse
+	if err := json.NewDecoder(resp).Decode(&lResp); err != nil {
 		t.Fatal(err)
 	}
-	if resp.Err != "" {
-		t.Fatalf("expected no volume, got: %s", resp.Err)
+	if lResp.Err != "" {
+		t.Fatalf("expected no volume, got: %s", lResp.Err)
 	}
-	if len(resp.Volumes) != 1 {
-		t.Fatalf("expected 1 volume, got %v", resp.Volumes)
+	if len(lResp.Volumes) != 1 {
+		t.Fatalf("expected 1 volume, got %v", lResp.Volumes)
 	}
-	if resp.Volumes[0].Name != "foo" {
-		t.Fatalf("expected volume `foo`, got %v", resp.Volumes[0])
+	if lResp.Volumes[0].Name != "foo" {
+		t.Fatalf("expected volume `foo`, got %v", lResp.Volumes[0])
 	}
 	if p.list != 1 {
 		t.Fatalf("expected list 1, got %d", p.list)
 	}
 
 	// Path
-	if _, err := pluginRequest(client, hostVirtualPath, Request{Name: "foo"}); err != nil {
+	if _, err := pluginRequest(client, hostVirtualPath, &PathRequest{Name: "foo"}); err != nil {
 		t.Fatal(err)
 	}
 	if p.path != 1 {
@@ -74,7 +76,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Mount
-	if _, err := pluginRequest(client, mountPath, Request{Name: "foo"}); err != nil {
+	if _, err := pluginRequest(client, mountPath, &MountRequest{Name: "foo"}); err != nil {
 		t.Fatal(err)
 	}
 	if p.mount != 1 {
@@ -82,7 +84,7 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Unmount
-	if _, err := pluginRequest(client, unmountPath, Request{Name: "foo"}); err != nil {
+	if _, err := pluginRequest(client, unmountPath, &UnmountRequest{Name: "foo"}); err != nil {
 		t.Fatal(err)
 	}
 	if p.unmount != 1 {
@@ -90,43 +92,44 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Remove
-	resp, err = pluginRequest(client, removePath, Request{Name: "foo"})
+	_, err = pluginRequest(client, removePath, &RemoveRequest{Name: "foo"})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if resp.Err != "" {
-		t.Fatalf("got error removing volume: %s", resp.Err)
 	}
 	if p.remove != 1 {
 		t.Fatalf("expected remove 1, got %d", p.remove)
 	}
 
 	// Capabilities
-	resp, err = pluginRequest(client, capabilitiesPath, Request{})
-	if err != nil {
+	resp, err = pluginRequest(client, capabilitiesPath, nil)
+	var cResp *CapabilitiesResponse
+	if err := json.NewDecoder(resp).Decode(&cResp); err != nil {
 		t.Fatal(err)
 	}
+
+	if cResp.Err != "" {
+		t.Fatalf("got error removing volume: %s", cResp.Err)
+	}
+
 	if p.capabilities != 1 {
 		t.Fatalf("expected remove 1, got %d", p.capabilities)
 	}
 }
 
-func pluginRequest(client *http.Client, method string, req Request) (*Response, error) {
+func pluginRequest(client *http.Client, method string, req interface{}) (io.Reader, error) {
 	b, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
+	}
+	if req == nil {
+		b = []byte{}
 	}
 	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
 	if err != nil {
 		return nil, err
 	}
-	var vResp Response
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
 
-	return &vResp, nil
+	return resp.Body, nil
 }
 
 type testPlugin struct {
@@ -141,73 +144,73 @@ type testPlugin struct {
 	capabilities int
 }
 
-func (p *testPlugin) Create(req Request) Response {
+func (p *testPlugin) Create(req *CreateRequest) error {
 	p.create++
 	p.volumes = append(p.volumes, req.Name)
-	return Response{}
+	return nil
 }
 
-func (p *testPlugin) Get(req Request) Response {
+func (p *testPlugin) Get(req *GetRequest) (*GetResponse, error) {
 	p.get++
 	for _, v := range p.volumes {
 		if v == req.Name {
-			return Response{Volume: &Volume{Name: v}}
+			return &GetResponse{Volume: &Volume{Name: v}}, nil
 		}
 	}
-	return Response{Err: "no such volume"}
+	return &GetResponse{}, fmt.Errorf("no such volume")
 }
 
-func (p *testPlugin) List(req Request) Response {
+func (p *testPlugin) List() (*ListResponse, error) {
 	p.list++
 	var vols []*Volume
 	for _, v := range p.volumes {
 		vols = append(vols, &Volume{Name: v})
 	}
-	return Response{Volumes: vols}
+	return &ListResponse{Volumes: vols}, nil
 }
 
-func (p *testPlugin) Remove(req Request) Response {
+func (p *testPlugin) Remove(req *RemoveRequest) error {
 	p.remove++
 	for i, v := range p.volumes {
 		if v == req.Name {
 			p.volumes = append(p.volumes[:i], p.volumes[i+1:]...)
-			return Response{}
+			return nil
 		}
 	}
-	return Response{Err: "no such volume"}
+	return fmt.Errorf("no such volume")
 }
 
-func (p *testPlugin) Path(req Request) Response {
+func (p *testPlugin) Path(req *PathRequest) (*PathResponse, error) {
 	p.path++
 	for _, v := range p.volumes {
 		if v == req.Name {
-			return Response{}
+			return &PathResponse{}, nil
 		}
 	}
-	return Response{Err: "no such volume"}
+	return &PathResponse{}, fmt.Errorf("no such volume")
 }
 
-func (p *testPlugin) Mount(req MountRequest) Response {
+func (p *testPlugin) Mount(req *MountRequest) (*MountResponse, error) {
 	p.mount++
 	for _, v := range p.volumes {
 		if v == req.Name {
-			return Response{}
+			return &MountResponse{}, nil
 		}
 	}
-	return Response{Err: "no such volume"}
+	return &MountResponse{}, fmt.Errorf("no such volume")
 }
 
-func (p *testPlugin) Unmount(req UnmountRequest) Response {
+func (p *testPlugin) Unmount(req *UnmountRequest) error {
 	p.unmount++
 	for _, v := range p.volumes {
 		if v == req.Name {
-			return Response{}
+			return nil
 		}
 	}
-	return Response{Err: "no such volume"}
+	return fmt.Errorf("no such volume")
 }
 
-func (p *testPlugin) Capabilities(req Request) Response {
+func (p *testPlugin) Capabilities() *CapabilitiesResponse {
 	p.capabilities++
-	return Response{Capabilities: Capability{Scope: "local"}}
+	return &CapabilitiesResponse{Capabilities: Capability{Scope: "local"}}
 }

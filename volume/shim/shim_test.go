@@ -37,16 +37,17 @@ func TestVolumeDriver(t *testing.T) {
 		Dial: l.Dial,
 	}}
 
-	resp, err := pluginRequest(client, "/VolumeDriver.Create", volumeplugin.Request{Name: "foo"})
+	resp, err := pluginRequest(client, "/VolumeDriver.Create", &volumeplugin.CreateRequest{Name: "foo"})
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf(err.Error())
 	}
+
 	if resp.Err != "" {
 		t.Fatalf("error while creating volume: %v", err)
 	}
 }
 
-func pluginRequest(client *http.Client, method string, req volumeplugin.Request) (*volumeplugin.Response, error) {
+func pluginRequest(client *http.Client, method string, req *volumeplugin.CreateRequest) (*volumeplugin.ErrorResponse, error) {
 	b, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func pluginRequest(client *http.Client, method string, req volumeplugin.Request)
 	if err != nil {
 		return nil, err
 	}
-	var vResp volumeplugin.Response
+	var vResp volumeplugin.ErrorResponse
 	err = json.NewDecoder(resp.Body).Decode(&vResp)
 	if err != nil {
 		return nil, err
