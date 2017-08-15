@@ -157,7 +157,7 @@ func (p *testPlugin) Get(req *GetRequest) (*GetResponse, error) {
 			return &GetResponse{Volume: &Volume{Name: v}}, nil
 		}
 	}
-	return &GetResponse{}, fmt.Errorf("no such volume")
+	return nil, fmt.Errorf("no such volume")
 }
 
 func (p *testPlugin) List() (*ListResponse, error) {
@@ -187,7 +187,7 @@ func (p *testPlugin) Path(req *PathRequest) (*PathResponse, error) {
 			return &PathResponse{}, nil
 		}
 	}
-	return &PathResponse{}, fmt.Errorf("no such volume")
+	return nil, fmt.Errorf("no such volume")
 }
 
 func (p *testPlugin) Mount(req *MountRequest) (*MountResponse, error) {
@@ -197,7 +197,7 @@ func (p *testPlugin) Mount(req *MountRequest) (*MountResponse, error) {
 			return &MountResponse{}, nil
 		}
 	}
-	return &MountResponse{}, fmt.Errorf("no such volume")
+	return nil, fmt.Errorf("no such volume")
 }
 
 func (p *testPlugin) Unmount(req *UnmountRequest) error {

@@ -185,7 +185,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Path(req)
 		if err != nil {
-			res.Err = err.Error()
+			msg := err.Error()
+			res = &PathResponse{Err: msg}
+			sdk.EncodeResponse(w, res, msg)
+			return
 		}
 		sdk.EncodeResponse(w, res, "")
 	})
@@ -198,7 +201,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Get(req)
 		if err != nil {
-			res.Err = err.Error()
+			msg := err.Error()
+			res = &GetResponse{Err: msg}
+			sdk.EncodeResponse(w, res, msg)
+			return
 		}
 		sdk.EncodeResponse(w, res, "")
 	})
@@ -221,7 +227,10 @@ func (h *Handler) initMux() {
 		log.Println("Entering go-plugins-helpers listPath")
 		res, err := h.driver.List()
 		if err != nil {
-			res.Err = err.Error()
+			msg := err.Error()
+			res = &ListResponse{Err: msg}
+			sdk.EncodeResponse(w, res, msg)
+			return
 		}
 		sdk.EncodeResponse(w, res, "")
 	})
