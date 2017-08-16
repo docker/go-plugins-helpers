@@ -138,6 +138,6 @@ func (h *Handler) handle(name string, actionCall actionHandler) {
 
 		res := actionCall(req)
 
-		sdk.EncodeResponse(w, res, res.Err)
+		sdk.EncodeResponse(w, res, res.Err != "")
 	})
 }

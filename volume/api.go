@@ -137,10 +137,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.Create(req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), "true")
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, struct{}{}, "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(removePath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers removePath")
@@ -151,10 +151,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.Remove(req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), "true")
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, struct{}{}, "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(mountPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers mountPath")
@@ -165,10 +165,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Mount(req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), "true")
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(hostVirtualPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers hostVirtualPath")
@@ -179,10 +179,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Path(req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), "true")
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(getPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers getPath")
@@ -193,10 +193,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Get(req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), "true")
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(unmountPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers unmountPath")
@@ -207,23 +207,23 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.Unmount(req)
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), "true")
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, struct{}{}, "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(listPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers listPath")
 		res, err := h.driver.List()
 		if err != nil {
-			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), "true")
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers capabilitiesPath")
-		sdk.EncodeResponse(w, h.driver.Capabilities(), "")
+		sdk.EncodeResponse(w, h.driver.Capabilities(), false)
 	})
 }

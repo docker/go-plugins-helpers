@@ -274,7 +274,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &InitResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, &InitResponse{Err: msg}, msg != "")
 	})
 	h.HandleFunc(createPath, func(w http.ResponseWriter, r *http.Request) {
 		req := CreateRequest{}
@@ -287,7 +287,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &CreateResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, &CreateResponse{Err: msg}, msg != "")
 	})
 	h.HandleFunc(createRWPath, func(w http.ResponseWriter, r *http.Request) {
 		req := CreateRequest{}
@@ -300,7 +300,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &CreateResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, &CreateResponse{Err: msg}, msg != "")
 	})
 	h.HandleFunc(removePath, func(w http.ResponseWriter, r *http.Request) {
 		req := RemoveRequest{}
@@ -313,7 +313,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &RemoveResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, &RemoveResponse{Err: msg}, msg != "")
 
 	})
 	h.HandleFunc(getPath, func(w http.ResponseWriter, r *http.Request) {
@@ -327,7 +327,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &GetResponse{Err: msg, Dir: dir}, msg)
+		sdk.EncodeResponse(w, &GetResponse{Err: msg, Dir: dir}, msg != "")
 	})
 	h.HandleFunc(putPath, func(w http.ResponseWriter, r *http.Request) {
 		req := PutRequest{}
@@ -340,7 +340,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &PutResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, &PutResponse{Err: msg}, msg != "")
 	})
 	h.HandleFunc(existsPath, func(w http.ResponseWriter, r *http.Request) {
 		req := ExistsRequest{}
@@ -349,11 +349,11 @@ func (h *Handler) initMux() {
 			return
 		}
 		exists := h.driver.Exists(req.ID)
-		sdk.EncodeResponse(w, &ExistsResponse{Exists: exists}, "")
+		sdk.EncodeResponse(w, &ExistsResponse{Exists: exists}, false)
 	})
 	h.HandleFunc(statusPath, func(w http.ResponseWriter, r *http.Request) {
 		status := h.driver.Status()
-		sdk.EncodeResponse(w, &StatusResponse{Status: status}, "")
+		sdk.EncodeResponse(w, &StatusResponse{Status: status}, false)
 	})
 	h.HandleFunc(getMetadataPath, func(w http.ResponseWriter, r *http.Request) {
 		req := GetMetadataRequest{}
@@ -366,7 +366,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &GetMetadataResponse{Err: msg, Metadata: metadata}, msg)
+		sdk.EncodeResponse(w, &GetMetadataResponse{Err: msg, Metadata: metadata}, msg != "")
 	})
 	h.HandleFunc(cleanupPath, func(w http.ResponseWriter, r *http.Request) {
 		err := h.driver.Cleanup()
@@ -374,7 +374,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &CleanupResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, &CleanupResponse{Err: msg}, msg != "")
 	})
 	h.HandleFunc(diffPath, func(w http.ResponseWriter, r *http.Request) {
 		req := DiffRequest{}
@@ -396,7 +396,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &ChangesResponse{Err: msg, Changes: changes}, msg)
+		sdk.EncodeResponse(w, &ChangesResponse{Err: msg, Changes: changes}, msg != "")
 	})
 	h.HandleFunc(applyDiffPath, func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
@@ -407,7 +407,7 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &ApplyDiffResponse{Err: msg, Size: size}, msg)
+		sdk.EncodeResponse(w, &ApplyDiffResponse{Err: msg, Size: size}, msg != "")
 	})
 	h.HandleFunc(diffSizePath, func(w http.ResponseWriter, r *http.Request) {
 		req := DiffRequest{}
@@ -420,11 +420,11 @@ func (h *Handler) initMux() {
 		if err != nil {
 			msg = err.Error()
 		}
-		sdk.EncodeResponse(w, &DiffSizeResponse{Err: msg, Size: size}, msg)
+		sdk.EncodeResponse(w, &DiffSizeResponse{Err: msg, Size: size}, msg != "")
 	})
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
 		caps := h.driver.Capabilities()
-		sdk.EncodeResponse(w, &CapabilitiesResponse{Capabilities: caps}, "")
+		sdk.EncodeResponse(w, &CapabilitiesResponse{Capabilities: caps}, false)
 	})
 }
 
