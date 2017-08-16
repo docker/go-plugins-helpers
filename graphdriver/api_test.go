@@ -2,6 +2,7 @@ package graphdriver
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -26,128 +27,119 @@ func TestHandler(t *testing.T) {
 	}}
 
 	// Init
-	init, err := CallInit(url, client, InitRequest{Home: "foo"})
+	_, err := pluginRequest(client, initPath, &InitRequest{Home: "foo"})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if init.Err != "" {
-		t.Fatalf("got error initialising graph drivers: %v", init.Err)
 	}
 	if p.init != 1 {
 		t.Fatalf("expected init 1, got %d", p.init)
 	}
 
 	// Create
-	create, err := CallCreate(url, client, CreateRequest{ID: "foo", Parent: "bar"})
+	_, err = pluginRequest(client, createPath, &CreateRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if create.Err != "" {
-		t.Fatalf("got error creating graph drivers: %v", create.Err)
 	}
 	if p.create != 1 {
 		t.Fatalf("expected create 1, got %d", p.create)
 	}
 
 	// CreateReadWrite
-	createReadWrite, err := CallCreateReadWrite(url, client,
-		CreateRequest{ID: "foo", Parent: "bar", MountLabel: "toto"})
+	_, err = pluginRequest(client, createRWPath, &CreateRequest{ID: "foo", Parent: "bar", MountLabel: "toto"})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if create.Err != "" {
-		t.Fatalf("got error creating read-write graph drivers: %v", createReadWrite.Err)
 	}
 	if p.createRW != 1 {
 		t.Fatalf("expected createReadWrite 1, got %d", p.createRW)
 	}
 
 	// Remove
-	remove, err := CallRemove(url, client, RemoveRequest{ID: "foo"})
+	_, err = pluginRequest(client, removePath, RemoveRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if remove.Err != "" {
-		t.Fatalf("got error removing graph drivers: %s", remove.Err)
 	}
 	if p.remove != 1 {
 		t.Fatalf("expected remove 1, got %d", p.remove)
 	}
 
 	// Get
-	get, err := CallGet(url, client, GetRequest{ID: "foo", MountLabel: "bar"})
+	resp, err := pluginRequest(client, getPath, GetRequest{ID: "foo", MountLabel: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if get.Err != "" {
-		t.Fatalf("got error getting graph drivers: %s", get.Err)
+	var gResp *GetResponse
+	if err := json.NewDecoder(resp).Decode(&gResp); err != nil {
+		t.Fatal(err)
+	}
+	if gResp.Dir != "baz" {
+		t.Fatalf("expected dir = 'baz', got %s", gResp.Dir)
 	}
 	if p.get != 1 {
 		t.Fatalf("expected get 1, got %d", p.get)
 	}
 
 	// Put
-	put, err := CallPut(url, client, PutRequest{ID: "foo"})
+	_, err = pluginRequest(client, putPath, PutRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if put.Err != "" {
-		t.Fatalf("got error putting graph drivers: %s", put.Err)
 	}
 	if p.put != 1 {
 		t.Fatalf("expected put 1, got %d", p.put)
 	}
 
 	// Exists
-	exists, err := CallExists(url, client, ExistsRequest{ID: "foo"})
+	resp, err = pluginRequest(client, existsPath, ExistsRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !exists.Exists {
-		t.Fatalf("got error testing for existence of graph drivers: %v", exists.Exists)
+	var eResp *ExistsResponse
+	if err := json.NewDecoder(resp).Decode(&eResp); err != nil {
+		t.Fatal(err)
+	}
+	if !eResp.Exists {
+		t.Fatalf("got error testing for existence of graph drivers: %v", eResp.Exists)
 	}
 	if p.exists != 1 {
 		t.Fatalf("expected exists 1, got %d", p.exists)
 	}
 
 	// Status
-	status, err := CallStatus(url, client, StatusRequest{})
+	resp, err = pluginRequest(client, statusPath, StatusRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if status.Status != nil {
-		t.Fatalf("got error putting graph drivers: %s", status.Status)
+	var sResp *StatusResponse
+	if err := json.NewDecoder(resp).Decode(&sResp); err != nil {
+		t.Fatal(err)
 	}
 	if p.status != 1 {
-		t.Fatalf("expected get 1, got %d", p.get)
+		t.Fatalf("expected get 1, got %d", p.status)
 	}
 
 	// GetMetadata
-	getMetadata, err := CallGetMetadata(url, client, GetMetadataRequest{ID: "foo"})
+	resp, err = pluginRequest(client, getMetadataPath, GetMetadataRequest{ID: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if getMetadata.Err != "" {
-		t.Fatalf("got error getting metadata for graph drivers: %s", getMetadata.Err)
+	var gmResp *GetMetadataResponse
+	if err := json.NewDecoder(resp).Decode(&gmResp); err != nil {
+		t.Fatal(err)
 	}
 	if p.getMetadata != 1 {
 		t.Fatalf("expected getMetadata 1, got %d", p.getMetadata)
 	}
 
 	// Cleanup
-	cleanup, err := CallCleanup(url, client, CleanupRequest{})
+	_, err = pluginRequest(client, cleanupPath, CleanupRequest{})
 	if err != nil {
 		t.Fatal(err)
-	}
-	if cleanup.Err != "" {
-		t.Fatalf("got error cleaning graph drivers up: %s", cleanup.Err)
 	}
 	if p.cleanup != 1 {
 		t.Fatalf("expected cleanup 1, got %d", p.cleanup)
 	}
 
 	// Diff
-	_, err = CallDiff(url, client, DiffRequest{ID: "foo", Parent: "bar"})
+	_, err = pluginRequest(client, diffPath, DiffRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,12 +148,13 @@ func TestHandler(t *testing.T) {
 	}
 
 	// Changes
-	changes, err := CallChanges(url, client, ChangesRequest{ID: "foo", Parent: "bar"})
+	resp, err = pluginRequest(client, changesPath, ChangesRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if changes.Err != "" {
-		t.Fatalf("got error putting graph drivers: %s", changes.Err)
+	var cResp *ChangesResponse
+	if err := json.NewDecoder(resp).Decode(&cResp); err != nil {
+		t.Fatal(err)
 	}
 	if p.status != 1 {
 		t.Fatalf("expected get 1, got %d", p.get)
@@ -170,41 +163,62 @@ func TestHandler(t *testing.T) {
 	// ApplyDiff
 	b := new(bytes.Buffer)
 	stream := bytes.NewReader(b.Bytes())
-	applyDiff, err := CallApplyDiff(url, client,
-		ApplyDiffRequest{ID: "foo", Parent: "bar", Stream: stream})
+	resp, err = pluginRequest(client, applyDiffPath, &ApplyDiffRequest{ID: "foo", Parent: "bar", Stream: stream})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if applyDiff.Err != "" {
-		t.Fatalf("got error applying diff on graph drivers: %s", applyDiff.Err)
+	var adResp *ApplyDiffResponse
+	if err := json.NewDecoder(resp).Decode(&adResp); err != nil {
+		t.Fatal(err)
 	}
 	if p.status != 1 {
 		t.Fatalf("expected applyDiff 1, got %d", p.applyDiff)
 	}
 
 	// DiffSize
-	diffSize, err := CallDiffSize(url, client, DiffSizeRequest{ID: "foo", Parent: "bar"})
+	resp, err = pluginRequest(client, diffSizePath, DiffSizeRequest{ID: "foo", Parent: "bar"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if diffSize.Err != "" {
-		t.Fatalf("got error getting diff size for graph drivers: %s", diffSize.Err)
+	var dsResp *DiffSizeResponse
+	if err := json.NewDecoder(resp).Decode(&dsResp); err != nil {
+		t.Fatal(err)
 	}
 	if p.diffSize != 1 {
 		t.Fatalf("expected diffSize 1, got %d", p.diffSize)
 	}
 
 	// Capabilities
-	caps, err := CallCapabilities(url, client, CapabilitiesRequest{})
+	resp, err = pluginRequest(client, capabilitiesPath, CapabilitiesRequest{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if caps.Capabilities.ReproducesExactDiffs != true {
-		t.Fatalf("got error getting capabilities for graph drivers: %v", caps.Capabilities)
+	var caResp *CapabilitiesResponse
+	if err := json.NewDecoder(resp).Decode(&caResp); err != nil {
+		t.Fatal(err)
+	}
+	if caResp.Capabilities.ReproducesExactDiffs != true {
+		t.Fatalf("got error getting capabilities for graph drivers: %v", caResp.Capabilities)
 	}
 	if p.capabilities != 1 {
 		t.Fatalf("expected get 1, got %d", p.get)
 	}
+}
+
+func pluginRequest(client *http.Client, method string, req interface{}) (io.Reader, error) {
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	if req == nil {
+		b = []byte{}
+	}
+	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Body, nil
 }
 
 type testPlugin struct {
@@ -249,7 +263,7 @@ func (p *testPlugin) Remove(string) error {
 
 func (p *testPlugin) Get(string, string) (string, error) {
 	p.get++
-	return "", nil
+	return "baz", nil
 }
 
 func (p *testPlugin) Put(string) error {

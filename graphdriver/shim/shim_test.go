@@ -1,6 +1,8 @@
 package shim
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -56,8 +58,6 @@ func Init(root string, options []string, uidMaps, gidMaps []idtools.IDMap) (grap
 	return d, nil
 }
 
-const url = "http://localhost"
-
 func TestGraphDriver(t *testing.T) {
 	h := NewHandlerFromGraphDriver(Init)
 	l := sockets.NewInmemSocket("test", 0)
@@ -68,11 +68,29 @@ func TestGraphDriver(t *testing.T) {
 		Dial: l.Dial,
 	}}
 
-	resp, err := graphPlugin.CallInit(url, client, graphPlugin.InitRequest{Home: "foo"})
+	resp, err := pluginRequest(client, "/GraphDriver.Init", &graphPlugin.InitRequest{Home: "foo"})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if resp.Err != "" {
 		t.Fatalf("error while creating GraphDriver: %v", err)
 	}
+}
+
+func pluginRequest(client *http.Client, method string, req *graphPlugin.InitRequest) (*graphPlugin.ErrorResponse, error) {
+	b, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Post("http://localhost"+method, "application/json", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	var gResp graphPlugin.ErrorResponse
+	err = json.NewDecoder(resp.Body).Decode(&gResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gResp, nil
 }

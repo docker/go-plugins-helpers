@@ -33,6 +33,9 @@ func TestHandler(t *testing.T) {
 
 	// Get
 	resp, err := pluginRequest(client, getPath, &GetRequest{Name: "foo"})
+	if err != nil {
+		t.Fatal(err)
+	}
 	var gResp *GetResponse
 	if err := json.NewDecoder(resp).Decode(&gResp); err != nil {
 		t.Fatal(err)
@@ -46,6 +49,9 @@ func TestHandler(t *testing.T) {
 
 	// List
 	resp, err = pluginRequest(client, listPath, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var lResp *ListResponse
 	if err := json.NewDecoder(resp).Decode(&lResp); err != nil {
 		t.Fatal(err)
