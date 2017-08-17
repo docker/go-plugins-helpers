@@ -27,7 +27,6 @@ func (d *shimDriver) List() (*volumeplugin.ListResponse, error) {
 	var res *volumeplugin.ListResponse
 	ls, err := d.d.List()
 	if err != nil {
-		res.Err = err.Error()
 		return &volumeplugin.ListResponse{}, err
 	}
 	vols := make([]*volumeplugin.Volume, len(ls))
@@ -47,7 +46,6 @@ func (d *shimDriver) Get(req *volumeplugin.GetRequest) (*volumeplugin.GetRespons
 	var res *volumeplugin.GetResponse
 	v, err := d.d.Get(req.Name)
 	if err != nil {
-		res.Err = err.Error()
 		return &volumeplugin.GetResponse{}, err
 	}
 	res.Volume = &volumeplugin.Volume{
@@ -73,8 +71,7 @@ func (d *shimDriver) Path(req *volumeplugin.PathRequest) (*volumeplugin.PathResp
 	var res *volumeplugin.PathResponse
 	v, err := d.d.Get(req.Name)
 	if err != nil {
-		res.Err = err.Error()
-		return res, err
+		return &volumeplugin.PathResponse{}, err
 	}
 	res.Mountpoint = v.Path()
 	return res, nil
@@ -84,12 +81,11 @@ func (d *shimDriver) Mount(req *volumeplugin.MountRequest) (*volumeplugin.MountR
 	var res *volumeplugin.MountResponse
 	v, err := d.d.Get(req.Name)
 	if err != nil {
-		res.Err = err.Error()
-		return res, err
+		return &volumeplugin.MountResponse{}, err
 	}
 	pth, err := v.Mount(req.ID)
 	if err != nil {
-		res.Err = err.Error()
+		return &volumeplugin.MountResponse{}, err
 	}
 	res.Mountpoint = pth
 	return res, nil

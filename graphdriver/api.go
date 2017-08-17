@@ -3,8 +3,6 @@ package graphdriver
 // See https://github.com/docker/docker/blob/master/experimental/plugins_graphdriver.md
 
 import (
-	"bytes"
-	"encoding/json"
 	"io"
 	"net/http"
 
@@ -45,11 +43,6 @@ type InitRequest struct {
 	GIDMaps []idtools.IDMap `json:"GIDMaps"`
 }
 
-// InitResponse is the strucutre that docker's init responses are serialized to.
-type InitResponse struct {
-	Err string
-}
-
 // Create
 
 // CreateRequest is the structure that docker's create requests are deserialized to.
@@ -60,21 +53,11 @@ type CreateRequest struct {
 	StorageOpt map[string]string
 }
 
-// CreateResponse is the strucutre that docker's create responses are serialized to.
-type CreateResponse struct {
-	Err string
-}
-
 // Remove
 
 // RemoveRequest is the structure that docker's remove requests are deserialized to.
 type RemoveRequest struct {
 	ID string
-}
-
-// RemoveResponse is the strucutre that docker's remove responses are serialized to.
-type RemoveResponse struct {
-	Err string
 }
 
 // Get
@@ -88,7 +71,6 @@ type GetRequest struct {
 // GetResponse is the strucutre that docker's remove responses are serialized to.
 type GetResponse struct {
 	Dir string
-	Err string
 }
 
 // Put
@@ -96,11 +78,6 @@ type GetResponse struct {
 // PutRequest is the structure that docker's put requests are deserialized to.
 type PutRequest struct {
 	ID string
-}
-
-// PutResponse is the strucutre that docker's put responses are serialized to.
-type PutResponse struct {
-	Err string
 }
 
 // Exists
@@ -135,18 +112,12 @@ type GetMetadataRequest struct {
 // GetMetadataResponse is the structure that docker's getMetadata responses are serialized to.
 type GetMetadataResponse struct {
 	Metadata map[string]string
-	Err      string
 }
 
 // Cleanup
 
 // CleanupRequest is the structure that docker's cleanup requests are deserialized to.
 type CleanupRequest struct{}
-
-// CleanupResponse is the structure that docker's cleanup responses are serialized to.
-type CleanupResponse struct {
-	Err string
-}
 
 // Diff
 
@@ -172,7 +143,6 @@ type ChangesRequest struct {
 // ChangesResponse is the structure that docker's changes responses are serialized to.
 type ChangesResponse struct {
 	Changes []Change
-	Err     string
 }
 
 // ChangeKind represents the type of change mage
@@ -205,7 +175,6 @@ type ApplyDiffRequest struct {
 // ApplyDiffResponse is the structure that docker's applyDiff responses are serialized to.
 type ApplyDiffResponse struct {
 	Size int64
-	Err  string
 }
 
 // DiffSize
@@ -219,7 +188,6 @@ type DiffSizeRequest struct {
 // DiffSizeResponse is the structure that docker's diffSize responses are serialized to.
 type DiffSizeResponse struct {
 	Size int64
-	Err  string
 }
 
 // CapabilitiesRequest is the structure that docker's capabilities requests are deserialized to.
@@ -228,6 +196,16 @@ type CapabilitiesRequest struct{}
 // CapabilitiesResponse is the structure that docker's capabilities responses are serialized to.
 type CapabilitiesResponse struct {
 	Capabilities graphDriver.Capabilities
+}
+
+// ErrorResponse is a formatted error message that docker can understand
+type ErrorResponse struct {
+	Err string
+}
+
+// NewErrorResponse creates an ErrorResponse with the provided message
+func NewErrorResponse(msg string) *ErrorResponse {
+	return &ErrorResponse{Err: msg}
 }
 
 // Driver represent the interface a driver must fulfill.
@@ -270,11 +248,11 @@ func (h *Handler) initMux() {
 			return
 		}
 		err = h.driver.Init(req.Home, req.Options, req.UIDMaps, req.GIDMaps)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &InitResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(createPath, func(w http.ResponseWriter, r *http.Request) {
 		req := CreateRequest{}
@@ -283,11 +261,11 @@ func (h *Handler) initMux() {
 			return
 		}
 		err = h.driver.Create(req.ID, req.Parent, req.MountLabel, req.StorageOpt)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &CreateResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(createRWPath, func(w http.ResponseWriter, r *http.Request) {
 		req := CreateRequest{}
@@ -296,11 +274,11 @@ func (h *Handler) initMux() {
 			return
 		}
 		err = h.driver.CreateReadWrite(req.ID, req.Parent, req.MountLabel, req.StorageOpt)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &CreateResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(removePath, func(w http.ResponseWriter, r *http.Request) {
 		req := RemoveRequest{}
@@ -309,11 +287,11 @@ func (h *Handler) initMux() {
 			return
 		}
 		err = h.driver.Remove(req.ID)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &RemoveResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, struct{}{}, false)
 
 	})
 	h.HandleFunc(getPath, func(w http.ResponseWriter, r *http.Request) {
@@ -323,11 +301,11 @@ func (h *Handler) initMux() {
 			return
 		}
 		dir, err := h.driver.Get(req.ID, req.MountLabel)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &GetResponse{Err: msg, Dir: dir}, msg)
+		sdk.EncodeResponse(w, &GetResponse{Dir: dir}, false)
 	})
 	h.HandleFunc(putPath, func(w http.ResponseWriter, r *http.Request) {
 		req := PutRequest{}
@@ -336,11 +314,11 @@ func (h *Handler) initMux() {
 			return
 		}
 		err = h.driver.Put(req.ID)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &PutResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(existsPath, func(w http.ResponseWriter, r *http.Request) {
 		req := ExistsRequest{}
@@ -349,11 +327,11 @@ func (h *Handler) initMux() {
 			return
 		}
 		exists := h.driver.Exists(req.ID)
-		sdk.EncodeResponse(w, &ExistsResponse{Exists: exists}, "")
+		sdk.EncodeResponse(w, &ExistsResponse{Exists: exists}, false)
 	})
 	h.HandleFunc(statusPath, func(w http.ResponseWriter, r *http.Request) {
 		status := h.driver.Status()
-		sdk.EncodeResponse(w, &StatusResponse{Status: status}, "")
+		sdk.EncodeResponse(w, &StatusResponse{Status: status}, false)
 	})
 	h.HandleFunc(getMetadataPath, func(w http.ResponseWriter, r *http.Request) {
 		req := GetMetadataRequest{}
@@ -362,19 +340,19 @@ func (h *Handler) initMux() {
 			return
 		}
 		metadata, err := h.driver.GetMetadata(req.ID)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &GetMetadataResponse{Err: msg, Metadata: metadata}, msg)
+		sdk.EncodeResponse(w, &GetMetadataResponse{Metadata: metadata}, false)
 	})
 	h.HandleFunc(cleanupPath, func(w http.ResponseWriter, r *http.Request) {
 		err := h.driver.Cleanup()
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &CleanupResponse{Err: msg}, msg)
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(diffPath, func(w http.ResponseWriter, r *http.Request) {
 		req := DiffRequest{}
@@ -392,22 +370,22 @@ func (h *Handler) initMux() {
 			return
 		}
 		changes, err := h.driver.Changes(req.ID, req.Parent)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &ChangesResponse{Err: msg, Changes: changes}, msg)
+		sdk.EncodeResponse(w, &ChangesResponse{Changes: changes}, false)
 	})
 	h.HandleFunc(applyDiffPath, func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		id := params.Get("id")
 		parent := params.Get("parent")
 		size, err := h.driver.ApplyDiff(id, parent, r.Body)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &ApplyDiffResponse{Err: msg, Size: size}, msg)
+		sdk.EncodeResponse(w, &ApplyDiffResponse{Size: size}, false)
 	})
 	h.HandleFunc(diffSizePath, func(w http.ResponseWriter, r *http.Request) {
 		req := DiffRequest{}
@@ -416,308 +394,14 @@ func (h *Handler) initMux() {
 			return
 		}
 		size, err := h.driver.DiffSize(req.ID, req.Parent)
-		msg := ""
 		if err != nil {
-			msg = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, &DiffSizeResponse{Err: msg, Size: size}, msg)
+		sdk.EncodeResponse(w, &DiffSizeResponse{Size: size}, false)
 	})
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
 		caps := h.driver.Capabilities()
-		sdk.EncodeResponse(w, &CapabilitiesResponse{Capabilities: caps}, "")
+		sdk.EncodeResponse(w, &CapabilitiesResponse{Capabilities: caps}, false)
 	})
-}
-
-// CallInit is the raw call to the Graphdriver.Init method
-func CallInit(url string, client *http.Client, req InitRequest) (*InitResponse, error) {
-	method := initPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp InitResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallCreateReadWrite is the raw call to the Graphdriver.CreateReadWrite method
-func CallCreateReadWrite(url string, client *http.Client, req CreateRequest) (*CreateResponse, error) {
-	method := createRWPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp CreateResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallCreate is the raw call to the Graphdriver.Create method
-func CallCreate(url string, client *http.Client, req CreateRequest) (*CreateResponse, error) {
-	method := createPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp CreateResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallRemove is the raw call to the Graphdriver.Remove method
-func CallRemove(url string, client *http.Client, req RemoveRequest) (*RemoveResponse, error) {
-	method := removePath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp RemoveResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallGet is the raw call to the Graphdriver.Get method
-func CallGet(url string, client *http.Client, req GetRequest) (*GetResponse, error) {
-	method := getPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp GetResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallPut is the raw call to the Graphdriver.Put method
-func CallPut(url string, client *http.Client, req PutRequest) (*PutResponse, error) {
-	method := putPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp PutResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallExists is the raw call to the Graphdriver.Exists method
-func CallExists(url string, client *http.Client, req ExistsRequest) (*ExistsResponse, error) {
-	method := existsPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp ExistsResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallStatus is the raw call to the Graphdriver.Status method
-func CallStatus(url string, client *http.Client, req StatusRequest) (*StatusResponse, error) {
-	method := statusPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp StatusResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallGetMetadata is the raw call to the Graphdriver.GetMetadata method
-func CallGetMetadata(url string, client *http.Client, req GetMetadataRequest) (*GetMetadataResponse, error) {
-	method := getMetadataPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp GetMetadataResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallCleanup is the raw call to the Graphdriver.Cleanup method
-func CallCleanup(url string, client *http.Client, req CleanupRequest) (*CleanupResponse, error) {
-	method := cleanupPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp CleanupResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallDiff is the raw call to the Graphdriver.Diff method
-func CallDiff(url string, client *http.Client, req DiffRequest) (*DiffResponse, error) {
-	method := diffPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	return &DiffResponse{Stream: resp.Body}, nil
-}
-
-// CallChanges is the raw call to the Graphdriver.Changes method
-func CallChanges(url string, client *http.Client, req ChangesRequest) (*ChangesResponse, error) {
-	method := changesPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp ChangesResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallApplyDiff is the raw call to the Graphdriver.ApplyDiff method
-func CallApplyDiff(url string, client *http.Client, req ApplyDiffRequest) (*ApplyDiffResponse, error) {
-	method := applyDiffPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp ApplyDiffResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallDiffSize is the raw call to the Graphdriver.CallDiffSize method
-func CallDiffSize(url string, client *http.Client, req DiffSizeRequest) (*DiffSizeResponse, error) {
-	method := diffSizePath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp DiffSizeResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
-}
-
-// CallCapabilities is the raw call to the Graphdriver.Capabilities method
-func CallCapabilities(url string, client *http.Client, req CapabilitiesRequest) (*CapabilitiesResponse, error) {
-	method := capabilitiesPath
-	b, err := json.Marshal(req)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Post(url+method, "application/json", bytes.NewReader(b))
-	if err != nil {
-		return nil, err
-	}
-	var vResp CapabilitiesResponse
-	err = json.NewDecoder(resp.Body).Decode(&vResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &vResp, nil
 }

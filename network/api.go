@@ -223,16 +223,14 @@ func (h *Handler) initMux() {
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
 		res, err := h.driver.GetCapabilities()
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
 		if res == nil {
-			msg := "Network driver must implement GetCapabilities"
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse("Network driver must implement GetCapabilities"), true)
 			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(createNetworkPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers createnetwork")
@@ -243,11 +241,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.CreateNetwork(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(allocateNetworkPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers allocatenetwork")
@@ -258,11 +255,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.AllocateNetwork(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(deleteNetworkPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &DeleteNetworkRequest{}
@@ -272,11 +268,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.DeleteNetwork(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(freeNetworkPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &FreeNetworkRequest{}
@@ -286,11 +281,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.FreeNetwork(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(createEndpointPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &CreateEndpointRequest{}
@@ -300,11 +294,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.CreateEndpoint(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(deleteEndpointPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &DeleteEndpointRequest{}
@@ -314,11 +307,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.DeleteEndpoint(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(endpointInfoPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &InfoRequest{}
@@ -328,10 +320,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.EndpointInfo(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(joinPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &JoinRequest{}
@@ -341,10 +333,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Join(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(leavePath, func(w http.ResponseWriter, r *http.Request) {
 		req := &LeaveRequest{}
@@ -354,11 +346,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.Leave(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(discoverNewPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &DiscoveryNotification{}
@@ -368,11 +359,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.DiscoverNew(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(discoverDeletePath, func(w http.ResponseWriter, r *http.Request) {
 		req := &DiscoveryNotification{}
@@ -382,11 +372,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.DiscoverDelete(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(programExtConnPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &ProgramExternalConnectivityRequest{}
@@ -396,11 +385,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.ProgramExternalConnectivity(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(revokeExtConnPath, func(w http.ResponseWriter, r *http.Request) {
 		req := &RevokeExternalConnectivityRequest{}
@@ -410,10 +398,9 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.RevokeExternalConnectivity(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, make(map[string]string), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 }

@@ -42,7 +42,6 @@ type MountRequest struct {
 // MountResponse structure for a volume mount response
 type MountResponse struct {
 	Mountpoint string
-	Err        string
 }
 
 // UnmountRequest structure for a volume unmount request
@@ -59,7 +58,6 @@ type PathRequest struct {
 // PathResponse structure for a volume path response
 type PathResponse struct {
 	Mountpoint string
-	Err        string
 }
 
 // GetRequest structure for a volume get request
@@ -69,19 +67,16 @@ type GetRequest struct {
 
 // GetResponse structure for a volume get response
 type GetResponse struct {
-	Err    string
 	Volume *Volume
 }
 
 // ListResponse structure for a volume list response
 type ListResponse struct {
-	Err     string
 	Volumes []*Volume
 }
 
 // CapabilitiesResponse structure for a volume capability response
 type CapabilitiesResponse struct {
-	Err          string
 	Capabilities Capability
 }
 
@@ -142,11 +137,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.Create(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, NewErrorResponse(""), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(removePath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers removePath")
@@ -157,11 +151,10 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.Remove(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, NewErrorResponse(""), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(mountPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers mountPath")
@@ -172,9 +165,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Mount(req)
 		if err != nil {
-			res.Err = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(hostVirtualPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers hostVirtualPath")
@@ -185,9 +179,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Path(req)
 		if err != nil {
-			res.Err = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(getPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers getPath")
@@ -198,9 +193,10 @@ func (h *Handler) initMux() {
 		}
 		res, err := h.driver.Get(req)
 		if err != nil {
-			res.Err = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(unmountPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers unmountPath")
@@ -211,23 +207,23 @@ func (h *Handler) initMux() {
 		}
 		err = h.driver.Unmount(req)
 		if err != nil {
-			msg := err.Error()
-			sdk.EncodeResponse(w, NewErrorResponse(msg), msg)
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, NewErrorResponse(""), "")
+		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(listPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers listPath")
 		res, err := h.driver.List()
 		if err != nil {
-			res.Err = err.Error()
+			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
+			return
 		}
-		sdk.EncodeResponse(w, res, "")
+		sdk.EncodeResponse(w, res, false)
 	})
 
 	h.HandleFunc(capabilitiesPath, func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Entering go-plugins-helpers capabilitiesPath")
-		sdk.EncodeResponse(w, h.driver.Capabilities(), "")
+		sdk.EncodeResponse(w, h.driver.Capabilities(), false)
 	})
 }

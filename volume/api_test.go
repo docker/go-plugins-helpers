@@ -24,7 +24,6 @@ func TestHandler(t *testing.T) {
 
 	// Create
 	_, err := pluginRequest(client, createPath, &CreateRequest{Name: "foo"})
-
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,12 +33,12 @@ func TestHandler(t *testing.T) {
 
 	// Get
 	resp, err := pluginRequest(client, getPath, &GetRequest{Name: "foo"})
+	if err != nil {
+		t.Fatal(err)
+	}
 	var gResp *GetResponse
 	if err := json.NewDecoder(resp).Decode(&gResp); err != nil {
 		t.Fatal(err)
-	}
-	if gResp.Err != "" {
-		t.Fatalf("got error getting volume: %s", gResp.Err)
 	}
 	if gResp.Volume.Name != "foo" {
 		t.Fatalf("expected volume `foo`, got %v", gResp.Volume)
@@ -50,12 +49,12 @@ func TestHandler(t *testing.T) {
 
 	// List
 	resp, err = pluginRequest(client, listPath, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var lResp *ListResponse
 	if err := json.NewDecoder(resp).Decode(&lResp); err != nil {
 		t.Fatal(err)
-	}
-	if lResp.Err != "" {
-		t.Fatalf("expected no volume, got: %s", lResp.Err)
 	}
 	if len(lResp.Volumes) != 1 {
 		t.Fatalf("expected 1 volume, got %v", lResp.Volumes)
@@ -105,10 +104,6 @@ func TestHandler(t *testing.T) {
 	var cResp *CapabilitiesResponse
 	if err := json.NewDecoder(resp).Decode(&cResp); err != nil {
 		t.Fatal(err)
-	}
-
-	if cResp.Err != "" {
-		t.Fatalf("got error removing volume: %s", cResp.Err)
 	}
 
 	if p.capabilities != 1 {
