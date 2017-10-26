@@ -1,8 +1,9 @@
 package secrets
 
 import (
-	"github.com/docker/go-plugins-helpers/sdk"
 	"net/http"
+
+	"github.com/docker/go-plugins-helpers/sdk"
 )
 
 const (
@@ -69,6 +70,6 @@ func (h *Handler) initMux() {
 			return
 		}
 		res := h.driver.Get(req)
-		sdk.EncodeResponse(w, res, res.Err)
+		sdk.EncodeResponse(w, res, res.Err != "")
 	})
 }
