@@ -8,6 +8,6 @@ A collection of helper packages to extend Docker Engine in Go
  Network       | [Link](https://docs.docker.com/engine/extend/plugins_network/) | Extend network management
  Volume        | [Link](https://docs.docker.com/engine/extend/plugins_volume/)  | Extend persistent storage
  IPAM          | [Link](https://github.com/docker/libnetwork/blob/master/docs/ipam.md) | Extend IP address management
- Graph (experimental) | [Link](https://github.com/docker/docker/blob/master/experimental/plugins_graphdriver.md) | Extend image and container fs storage
+ Graph (experimental) | [Link](https://github.com/docker/cli/blob/master/docs/extend/plugins_graphdriver.md)| Extend image and container fs storage
 
 See the [understand Docker plugins documentation section](https://docs.docker.com/engine/extend/plugins/).
