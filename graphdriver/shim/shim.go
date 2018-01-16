@@ -69,7 +69,8 @@ func (d *shimDriver) Get(id, mountLabel string) (string, error) {
 	if d == nil {
 		return "", errNotInitialized
 	}
-	return d.driver.Get(id, mountLabel)
+	res, err := d.driver.Get(id, mountLabel)
+	return res.Path(), err
 }
 
 func (d *shimDriver) Put(id string) error {

@@ -61,10 +61,7 @@ func (d *shimDriver) Remove(req *volumeplugin.RemoveRequest) error {
 	if err != nil {
 		return err
 	}
-	if err := d.d.Remove(v); err != nil {
-		return err
-	}
-	return nil
+	return d.d.Remove(v)
 }
 
 func (d *shimDriver) Path(req *volumeplugin.PathRequest) (*volumeplugin.PathResponse, error) {
@@ -96,10 +93,7 @@ func (d *shimDriver) Unmount(req *volumeplugin.UnmountRequest) error {
 	if err != nil {
 		return err
 	}
-	if err := v.Unmount(req.ID); err != nil {
-		return err
-	}
-	return nil
+	return v.Unmount(req.ID)
 }
 
 func (d *shimDriver) Capabilities() *volumeplugin.CapabilitiesResponse {
