@@ -1,6 +1,7 @@
 package sdk
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -13,7 +14,8 @@ const activatePath = "/Plugin.Activate"
 // Handler is the base to create plugin handlers.
 // It initializes connections and sockets to listen to.
 type Handler struct {
-	mux *http.ServeMux
+	mux    *http.ServeMux
+	server *http.Server
 }
 
 // NewHandler creates a new Handler with an http mux.
@@ -25,16 +27,21 @@ func NewHandler(manifest string) Handler {
 		fmt.Fprintln(w, manifest)
 	})
 
-	return Handler{mux: mux}
+	server := &http.Server{
+		Handler: mux,
+	}
+
+	return Handler{mux: mux, server: server}
 }
 
 // Serve sets up the handler to serve requests on the passed in listener
 func (h Handler) Serve(l net.Listener) error {
-	server := http.Server{
-		Addr:    l.Addr().String(),
-		Handler: h.mux,
-	}
-	return server.Serve(l)
+	h.server.Addr = l.Addr().String()
+	return h.server.Serve(l)
+}
+
+func (h Handler) Shutdown(ctx context.Context) error {
+	return h.server.Shutdown(ctx)
 }
 
 // ServeTCP makes the handler to listen for request in a given TCP address.
