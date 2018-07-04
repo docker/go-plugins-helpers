@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"math/big"
 	"net/http"
@@ -197,10 +198,35 @@ func TestPeerCertificateMarshalJSON(t *testing.T) {
 
 }
 
+func callURL(url string) {
+	c := http.Client{
+		Timeout: 10 * time.Millisecond,
+	}
+	res := make(chan interface{}, 1)
+	go func() {
+		for {
+			_, err := c.Get(url)
+			if err == nil {
+				res <- nil
+			}
+		}
+	}()
+
+	select {
+	case <-res:
+		return
+	case <-time.After(5 * time.Second):
+		fmt.Printf("Timeout connecting to %s\n", url)
+		os.Exit(1)
+	}
+}
+
 func TestMain(m *testing.M) {
 	d := &TestPlugin{}
 	h := NewHandler(d)
-	go h.ServeTCP("test", ":32456", "", nil)
+	go h.ServeTCP("test", "localhost:32456", "", nil)
+
+	callURL("http://localhost:32456/Plugin.Activate")
 
 	os.Exit(m.Run())
 }

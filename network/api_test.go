@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/docker/go-plugins-helpers/sdk"
 )
@@ -95,16 +97,43 @@ func (e *ErrDriver) Leave(r *LeaveRequest) error {
 	return errors.New("I CAN HAZ ERRORZ")
 }
 
+func callURL(url string) {
+	c := http.Client{
+		Timeout: 10 * time.Millisecond,
+	}
+	res := make(chan interface{}, 1)
+	go func() {
+		for {
+			_, err := c.Get(url)
+			if err == nil {
+				res <- nil
+			}
+		}
+	}()
+
+	select {
+	case <-res:
+		return
+	case <-time.After(5 * time.Second):
+		fmt.Printf("Timeout connecting to %s\n", url)
+		os.Exit(1)
+	}
+}
+
 func TestMain(m *testing.M) {
 	d := &TestDriver{}
 	h1 := NewHandler(d)
-	go h1.ServeTCP("test", ":32234", "", nil)
+	go h1.ServeTCP("test", "localhost:32234", "", nil)
 
 	e := &ErrDriver{}
 	h2 := NewHandler(e)
-	go h2.ServeTCP("err", ":32567", "", nil)
+	go h2.ServeTCP("err", "localhost:32567", "", nil)
 
-	m.Run()
+	// Test that the ServeTCP is ready for use.
+	callURL("http://localhost:32234/Plugin.Activate")
+	callURL("http://localhost:32567/Plugin.Activate")
+
+	os.Exit(m.Run())
 }
 
 func TestActivate(t *testing.T) {

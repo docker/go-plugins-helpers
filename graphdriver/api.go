@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	graphDriver "github.com/docker/docker/daemon/graphdriver"
+	"github.com/docker/docker/pkg/containerfs"
 	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/go-plugins-helpers/sdk"
 )
@@ -214,7 +215,7 @@ type Driver interface {
 	Create(id, parent, mountlabel string, storageOpt map[string]string) error
 	CreateReadWrite(id, parent, mountlabel string, storageOpt map[string]string) error
 	Remove(id string) error
-	Get(id, mountLabel string) (string, error)
+	Get(id, mountLabel string) (containerfs.ContainerFS, error)
 	Put(id string) error
 	Exists(id string) bool
 	Status() [][2]string
@@ -305,7 +306,7 @@ func (h *Handler) initMux() {
 			sdk.EncodeResponse(w, NewErrorResponse(err.Error()), true)
 			return
 		}
-		sdk.EncodeResponse(w, &GetResponse{Dir: dir}, false)
+		sdk.EncodeResponse(w, &GetResponse{Dir: dir.Path()}, false)
 	})
 	h.HandleFunc(putPath, func(w http.ResponseWriter, r *http.Request) {
 		req := PutRequest{}

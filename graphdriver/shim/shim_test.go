@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/docker/docker/pkg/containerfs"
+
 	"github.com/docker/docker/daemon/graphdriver"
 	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/go-connections/sockets"
@@ -31,8 +33,8 @@ func (t *testGraphDriver) Create(id, parent string, opts *graphdriver.CreateOpts
 func (t *testGraphDriver) Remove(id string) error {
 	return nil
 }
-func (t *testGraphDriver) Get(id, mountLabel string) (dir string, err error) {
-	return "", nil
+func (t *testGraphDriver) Get(id, mountLabel string) (dir containerfs.ContainerFS, err error) {
+	return containerfs.NewLocalContainerFS(""), nil
 }
 func (t *testGraphDriver) Put(id string) error {
 	return nil

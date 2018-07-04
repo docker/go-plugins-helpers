@@ -7,6 +7,7 @@ import (
 
 	graphDriver "github.com/docker/docker/daemon/graphdriver"
 	"github.com/docker/docker/pkg/archive"
+	"github.com/docker/docker/pkg/containerfs"
 	"github.com/docker/docker/pkg/idtools"
 	graphPlugin "github.com/docker/go-plugins-helpers/graphdriver"
 )
@@ -65,9 +66,9 @@ func (d *shimDriver) Remove(id string) error {
 	return d.driver.Remove(id)
 }
 
-func (d *shimDriver) Get(id, mountLabel string) (string, error) {
+func (d *shimDriver) Get(id, mountLabel string) (containerfs.ContainerFS, error) {
 	if d == nil {
-		return "", errNotInitialized
+		return nil, errNotInitialized
 	}
 	return d.driver.Get(id, mountLabel)
 }
