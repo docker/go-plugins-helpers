@@ -84,6 +84,7 @@ type CapabilitiesResponse struct {
 type Volume struct {
 	Name       string
 	Mountpoint string
+	CreatedAt  string
 	Status     map[string]interface{}
 }
 
