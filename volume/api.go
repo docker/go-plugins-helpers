@@ -85,7 +85,7 @@ type Volume struct {
 	Name       string
 	Mountpoint string
 	CreatedAt  string `json:",omitempty"`
-	Status     map[string]interface{}
+	Status     map[string]interface{} `json:",omitempty"`
 }
 
 // Capability represents the list of capabilities a volume driver can return
