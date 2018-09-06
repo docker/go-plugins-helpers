@@ -21,6 +21,7 @@ type Request struct {
 	ServiceLabels       map[string]string `json:",omitempty"` // ServiceLabels capture environment names and other metadata pertaining to the service
 	TaskID              string            `json:",omitempty"` // TaskID is the ID of the task that the secret is assigned to
 	TaskName            string            `json:",omitempty"` // TaskName is the name of the task that the secret is assigned to
+	TaskImage           string            `json:",omitempty"` // TaskName is the image of the task that the secret is assigned to
 	ServiceEndpointSpec *EndpointSpec     `json:",omitempty"` // ServiceEndpointSpec holds the specification for endpoints
 }
 
