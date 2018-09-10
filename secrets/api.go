@@ -14,9 +14,14 @@ const (
 // Request is the plugin secret request
 type Request struct {
 	SecretName          string            `json:",omitempty"` // SecretName is the name of the secret to request from the plugin
+	SecretLabels        map[string]string `json:",omitempty"` // SecretLabels capture environment names and other metadata pertaining to the secret
 	ServiceHostname     string            `json:",omitempty"` // ServiceHostname is the hostname of the service, can be used for x509 certificate
 	ServiceName         string            `json:",omitempty"` // ServiceName is the name of the service that requested the secret
-	ServiceLabels       map[string]string `json:",omitempty"` // ServiceLabels capture environment names and other metadata
+	ServiceID           string            `json:",omitempty"` // ServiceID is the name of the service that requested the secret
+	ServiceLabels       map[string]string `json:",omitempty"` // ServiceLabels capture environment names and other metadata pertaining to the service
+	TaskID              string            `json:",omitempty"` // TaskID is the ID of the task that the secret is assigned to
+	TaskName            string            `json:",omitempty"` // TaskName is the name of the task that the secret is assigned to
+	TaskImage           string            `json:",omitempty"` // TaskName is the image of the task that the secret is assigned to
 	ServiceEndpointSpec *EndpointSpec     `json:",omitempty"` // ServiceEndpointSpec holds the specification for endpoints
 }
 
