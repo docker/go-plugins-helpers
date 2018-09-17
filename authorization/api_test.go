@@ -140,7 +140,7 @@ func TestAuthZRes(t *testing.T) {
 
 func TestPeerCertificateMarshalJSON(t *testing.T) {
 	template := &x509.Certificate{
-		IsCA: true,
+		IsCA:                  true,
 		BasicConstraintsValid: true,
 		SubjectKeyId:          []byte{1, 2, 3},
 		SerialNumber:          big.NewInt(1234),

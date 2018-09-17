@@ -83,9 +83,9 @@ type CapabilitiesResponse struct {
 // Volume represents a volume object for use with `Get` and `List` requests
 type Volume struct {
 	Name       string
-	Mountpoint string
-	CreatedAt  string
-	Status     map[string]interface{}
+	Mountpoint string                 `json:",omitempty"`
+	CreatedAt  string                 `json:",omitempty"`
+	Status     map[string]interface{} `json:",omitempty"`
 }
 
 // Capability represents the list of capabilities a volume driver can return
