@@ -29,6 +29,11 @@ type Request struct {
 type Response struct {
 	Value []byte `json:",omitempty"` // Value is the value of the secret
 	Err   string `json:",omitempty"` // Err is the error response of the plugin
+
+	// DoNotReuse indicates that the secret returned from this request should
+	// only be used for one task, and any further tasks should call the secret
+	// driver again.
+	DoNotReuse bool `json:",omitempty"`
 }
 
 // EndpointSpec represents the spec of an endpoint.
