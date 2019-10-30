@@ -34,6 +34,7 @@ This library is designed to be integrated in your program.
 - https://github.com/cpdevws/img-authz-plugin
 - https://github.com/casbin/casbin-authz-plugin
 - https://github.com/kassisol/hbm
+- https://github.com/leogr/docker-authz-plugin
 
 ## License
 
