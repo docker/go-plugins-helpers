@@ -1,7 +1,7 @@
 package shim
 
 import (
-	"github.com/docker/docker/volume"
+	"github.com/moby/moby/volume"
 	volumeplugin "github.com/docker/go-plugins-helpers/volume"
 )
 

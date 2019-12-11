@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/docker/docker/pkg/containerfs"
+	"github.com/moby/moby/pkg/containerfs"
 
-	"github.com/docker/docker/daemon/graphdriver"
-	"github.com/docker/docker/pkg/idtools"
+	"github.com/moby/moby/daemon/graphdriver"
+	"github.com/moby/moby/pkg/idtools"
 	"github.com/docker/go-connections/sockets"
 	graphPlugin "github.com/docker/go-plugins-helpers/graphdriver"
 )
