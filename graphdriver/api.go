@@ -1,6 +1,6 @@
 package graphdriver
 
-// See https://github.com/docker/docker/blob/master/experimental/plugins_graphdriver.md
+// See https://github.com/docker/cli/blob/master/docs/extend/plugins_graphdriver.md
 
 import (
 	"io"
