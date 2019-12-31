@@ -3,7 +3,7 @@
 REPO_NAME = go-plugins-helpers
 REPO_OWNER = docker
 PKG_NAME = github.com/${REPO_OWNER}/${REPO_NAME}
-IMAGE = golang:1.11
+IMAGE = golang:1.13
 
 all: test
 
@@ -16,7 +16,7 @@ test:
 
 install-deps:
 	@echo "+ $@"
-	@go get -u github.com/golang/lint/golint
+	@go get -u golang.org/x/lint/golint
 	@go get -d -t ./...
 
 lint:
