@@ -32,8 +32,10 @@ func createPluginSpecDirWindows(name, address, daemonRoot string) (string, error
 
 	pluginSpecDir := PluginSpecDir(daemonRoot)
 
-	if err := windowsCreateDirectoryWithACL(pluginSpecDir); err != nil {
-		return "", err
+	if _, err := os.Stat(pluginSpecDir); os.IsNotExist(err) {
+		if err := windowsCreateDirectoryWithACL(pluginSpecDir); err != nil {
+			return "", err
+		}
 	}
 	return pluginSpecDir, nil
 }
