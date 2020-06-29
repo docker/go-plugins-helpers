@@ -36,7 +36,7 @@ func (h *Handler) Serve(l net.Listener) error {
 		Addr:    l.Addr().String(),
 		Handler: h.mux,
 	}
-	
+
 	h.server = &server
 	return server.Serve(l)
 }
@@ -52,7 +52,7 @@ func (h *Handler) Shutdown(c context.Context) error {
 // of docker daemon must be provided. To get default directory, use
 // WindowsDefaultDaemonRootDir() function. On Unix, this parameter is ignored.
 func (h *Handler) ServeTCP(pluginName, addr, daemonDir string, tlsConfig *tls.Config) error {
-	l, spec, err := newTCPListener(addr, pluginName, daemonDir, tlsConfig)
+	l, spec, err := NewTCPListener(addr, pluginName, daemonDir, tlsConfig)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (h *Handler) ServeTCP(pluginName, addr, daemonDir string, tlsConfig *tls.Co
 // ServeUnix makes the handler to listen for requests in a unix socket.
 // It also creates the socket file in the right directory for docker to read.
 func (h *Handler) ServeUnix(addr string, gid int) error {
-	l, spec, err := newUnixListener(addr, gid)
+	l, spec, err := NewUnixListener(addr, gid)
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (h *Handler) ServeUnix(addr string, gid int) error {
 // of docker daemon must be provided. To get default directory, use
 // WindowsDefaultDaemonRootDir() function. On Unix, this parameter is ignored.
 func (h *Handler) ServeWindows(addr, pluginName, daemonDir string, pipeConfig *WindowsPipeConfig) error {
-	l, spec, err := newWindowsListener(addr, pluginName, daemonDir, pipeConfig)
+	l, spec, err := NewWindowsListener(addr, pluginName, daemonDir, pipeConfig)
 	if err != nil {
 		return err
 	}

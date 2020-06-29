@@ -8,7 +8,7 @@ import (
 	"github.com/docker/go-connections/sockets"
 )
 
-func newTCPListener(address, pluginName, daemonDir string, tlsConfig *tls.Config) (net.Listener, string, error) {
+func NewTCPListener(address, pluginName, daemonDir string, tlsConfig *tls.Config) (net.Listener, string, error) {
 	listener, err := sockets.NewTCPSocket(address, tlsConfig)
 	if err != nil {
 		return nil, "", err
