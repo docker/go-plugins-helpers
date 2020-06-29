@@ -108,7 +108,7 @@ type Handler struct {
 
 // NewHandler initializes the request handler with a plugin implementation.
 func NewHandler(plugin Plugin) *Handler {
-	h := &Handler{plugin, sdk.NewHandler(manifest)}
+	h := &Handler{plugin, *sdk.NewHandler(manifest)}
 	h.initMux()
 	return h
 }
