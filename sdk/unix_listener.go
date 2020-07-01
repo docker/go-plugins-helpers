@@ -12,6 +12,8 @@ import (
 
 const pluginSockDir = "/run/docker/plugins"
 
+// NewUnixListener constructs a net.Listener to use for serving requests at the given unix socket.
+// It also creates the socket file in the right directory for docker to read.
 func NewUnixListener(pluginName string, gid int) (net.Listener, string, error) {
 	path, err := fullSocketAddress(pluginName)
 	if err != nil {

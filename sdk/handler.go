@@ -41,7 +41,8 @@ func (h *Handler) Serve(l net.Listener) error {
 	return server.Serve(l)
 }
 
-// Gracefully shuts down the http.Server serving requests
+// Shutdown gracefully shuts down the http.Server serving requests after Serve or
+// Serve{TCP,Unix,Windows} was called.
 func (h *Handler) Shutdown(c context.Context) error {
 	return h.server.Shutdown(c)
 }
