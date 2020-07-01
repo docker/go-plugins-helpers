@@ -14,7 +14,7 @@ const activatePath = "/Plugin.Activate"
 // Handler is the base to create plugin handlers.
 // It initializes connections and sockets to listen to.
 type Handler struct {
-	mux *http.ServeMux
+	mux    *http.ServeMux
 	server *http.Server
 }
 
