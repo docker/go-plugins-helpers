@@ -1,7 +1,6 @@
 package network
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/docker/go-plugins-helpers/sdk"
@@ -233,7 +232,6 @@ func (h *Handler) initMux() {
 		sdk.EncodeResponse(w, res, false)
 	})
 	h.HandleFunc(createNetworkPath, func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Entering go-plugins-helpers createnetwork")
 		req := &CreateNetworkRequest{}
 		err := sdk.DecodeRequest(w, r, req)
 		if err != nil {
@@ -247,7 +245,6 @@ func (h *Handler) initMux() {
 		sdk.EncodeResponse(w, struct{}{}, false)
 	})
 	h.HandleFunc(allocateNetworkPath, func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Entering go-plugins-helpers allocatenetwork")
 		req := &AllocateNetworkRequest{}
 		err := sdk.DecodeRequest(w, r, req)
 		if err != nil {
