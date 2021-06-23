@@ -3,7 +3,7 @@
 REPO_NAME = go-plugins-helpers
 REPO_OWNER = docker
 PKG_NAME = github.com/${REPO_OWNER}/${REPO_NAME}
-IMAGE = golang:1.13
+IMAGE = golang:1.16
 
 all: test
 
@@ -12,7 +12,7 @@ test-local: install-deps fmt lint vet
 	@go test -v ./...
 
 test:
-	@docker run -v ${shell pwd}:/go/src/${PKG_NAME} -w /go/src/${PKG_NAME} ${IMAGE} make test-local
+	@docker run -e GO111MODULE=off -v ${shell pwd}:/go/src/${PKG_NAME} -w /go/src/${PKG_NAME} ${IMAGE} make test-local
 
 install-deps:
 	@echo "+ $@"
