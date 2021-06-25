@@ -123,7 +123,7 @@ type Handler struct {
 
 // NewHandler initializes the request handler with a driver implementation.
 func NewHandler(driver Driver) *Handler {
-	h := &Handler{driver, sdk.NewHandler(manifest)}
+	h := &Handler{driver, *sdk.NewHandler(manifest)}
 	h.initMux()
 	return h
 }
