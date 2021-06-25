@@ -17,7 +17,13 @@ func newUnixListener(pluginName string, gid int) (net.Listener, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	listener, err := sockets.NewUnixSocket(path, gid)
+	// try systemd socket activation first
+	listener, err := setupSocketActivation()
+	if err == nil {
+		return listener, path, nil
+	}
+
+	listener, err = sockets.NewUnixSocket(path, gid)
 	if err != nil {
 		return nil, "", err
 	}
