@@ -15,7 +15,7 @@ This library is designed to be integrated in your program.
 ```go
   p := MyAuthZPlugin{}
   h := authorization.NewHandler(p)
-  h.ServeTCP("test_plugin", ":8080")
+  h.ServeTCP("test_plugin", ":8080", "", nil)
 ```
 
 ### Example using Unix sockets:
