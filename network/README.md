@@ -12,17 +12,42 @@ This library is designed to be integrated in your program.
 4. On Windows, docker daemon data dir must be provided for ServeTCP and ServeWindows functions.
 On Unix, this parameter is ignored.
 
-### Example using TCP sockets:
+## Quickstart (using TCP sockets)
 
+Here is a minimalist example to start the network driver on your host machine.
 ```go
-  import "github.com/docker/go-plugins-helpers/network"
+package main
 
+import (
+  "fmt"
+  "os"
+
+  "github.com/docker/go-plugins-helpers/network"
+)
+
+type MyNetworkDriver struct {
+  network.Driver
+}
+
+func main() {
   d := MyNetworkDriver{}
-  h := network.NewHandler(d)
-  h.ServeTCP("test_network", ":8080", "")
-  // on windows:
-  h.ServeTCP("test_network", ":8080", WindowsDefaultDaemonRootDir())
+  h := network.NewHandler(&d)
+  err := h.ServeTCP("test_network", "localhost:8080", "", nil)
+  if err != nil {
+    fmt.Printf("error occurred: %s\n", err.Error())
+    os.Exit(1)
+  }
+}
+
 ```
+
+You can test this out by the following:
+```bash
+$ curl http://localhost:8080/Plugin.Activate
+{"Implements": ["NetworkDriver"]}
+```
+
+## Further Examples
 
 ### Example using Unix sockets:
 
