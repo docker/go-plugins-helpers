@@ -96,7 +96,7 @@ type Handler struct {
 
 // NewHandler initializes the request handler with a driver implementation.
 func NewHandler(ipam Ipam) *Handler {
-	h := &Handler{ipam, sdk.NewHandler(manifest)}
+	h := &Handler{ipam, *sdk.NewHandler(manifest)}
 	h.initMux()
 	return h
 }
