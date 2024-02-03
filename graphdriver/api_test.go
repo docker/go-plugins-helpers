@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	graphDriver "github.com/docker/docker/daemon/graphdriver"
-	"github.com/docker/docker/pkg/containerfs"
 	"github.com/docker/docker/pkg/idtools"
 	"github.com/docker/go-connections/sockets"
 )
@@ -262,9 +261,9 @@ func (p *testPlugin) Remove(string) error {
 	return nil
 }
 
-func (p *testPlugin) Get(string, string) (containerfs.ContainerFS, error) {
+func (p *testPlugin) Get(string, string) (string, error) {
 	p.get++
-	return containerfs.NewLocalContainerFS("baz"), nil
+	return "baz", nil
 }
 
 func (p *testPlugin) Put(string) error {
