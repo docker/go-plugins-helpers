@@ -3,7 +3,7 @@ package network
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -142,7 +142,7 @@ func TestActivate(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 
 	if string(body) != manifest+"\n" {
 		t.Fatalf("Expected %s, got %s\n", manifest+"\n", string(body))
@@ -155,7 +155,7 @@ func TestCapabilitiesExchange(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 
 	expected := `{"Scope":"local","ConnectivityScope":"global"}`
 	if string(body) != expected+"\n" {
@@ -174,7 +174,7 @@ func TestCreateNetworkSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusOK {
 		t.Fatalf("Expected 200, got %d\n", response.StatusCode)
@@ -193,7 +193,7 @@ func TestCreateNetworkError(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 
 	if response.StatusCode != http.StatusInternalServerError {
 		t.Fatalf("Expected 500, got %d\n", response.StatusCode)
@@ -214,7 +214,7 @@ func TestProgramExternalConnectivity(t *testing.T) {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(response.Body)
+		body, _ := io.ReadAll(response.Body)
 		t.Fatalf("Expected %d, got %d: %s\n", http.StatusOK, response.StatusCode, string(body))
 	}
 }
