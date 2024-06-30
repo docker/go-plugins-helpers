@@ -11,9 +11,13 @@
 [Org]
 	[Org."Core maintainers"]
 		people = [
-			"calavera",
-			"dave-tucker",
-			"runcom",
+			"akerouanton",
+			"laurazard",
+			"neersighted",
+			"robmry",
+			"rumpl",
+			"thajeztah",
+			"vvoland",
 		]
 
 [people]
@@ -23,17 +27,38 @@
 # in the people section.
 
 	# ADD YOURSELF HERE IN ALPHABETICAL ORDER
-	[people.calavera]
-	Name = "David Calavera"
-	Email = "david.calavera@gmail.com"
-	GitHub = "calavera"
 
-	[people.dave-tucker]
-	Name = "Dave Tucker"
-	Email = "dt@docker.com"
-	GitHub = "dave-tucker"
+	[people.akerouanton]
+	Name = "Albin Kerouanton"
+	Email = "albinker@gmail.com"
+	GitHub = "akerouanton"
 
-	[people.runcom]
-	Name = "Antonio Murdaca"
-	Email = "runcom@redhat.com"
-	GitHub = "runcom"
+	[people.laurazard]
+	Name = "Laura Brehm"
+	Email = "laura.brehm@docker.com"
+	GitHub = "laurazard"
+
+	[people.neersighted]
+	Name = "Bjorn Neergaard"
+	Email = "bjorn@neersighted.com"
+	GitHub = "neersighted"
+
+	[people.robmry]
+	Name = "Rob Murray"
+	Email = "rob.murray@docker.com"
+	GitHub = "robmry"
+
+	[people.rumpl]
+	Name = "Djordje Lukic"
+	Email = "djordje.lukic@docker.com"
+	GitHub = "rumpl"
+
+	[people.thajeztah]
+	Name = "Sebastiaan van Stijn"
+	Email = "github@gone.nl"
+	GitHub = "thaJeztah"
+
+	[people.vvoland]
+	Name = "Paweł Gronowski"
+	Email = "pawel.gronowski@docker.com"
+	GitHub = "vvoland"
