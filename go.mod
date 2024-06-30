@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
-	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
+	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/docker/docker v23.0.13+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/stretchr/testify v1.9.0
