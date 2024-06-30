@@ -12,7 +12,7 @@ type shimDriver struct {
 // NewHandlerFromVolumeDriver creates a plugin handler from an existing volume
 // driver. This could be used, for instance, by the `local` volume driver built-in
 // to Docker Engine and it would create a plugin from it that maps plugin API calls
-// directly to any volume driver that satifies the volume.Driver interface from
+// directly to any volume driver that satisfies the volume.Driver interface from
 // Docker Engine.
 func NewHandlerFromVolumeDriver(d volume.Driver) *volumeplugin.Handler {
 	return volumeplugin.NewHandler(&shimDriver{d})
