@@ -27,30 +27,39 @@ func (t *testGraphDriver) String() string {
 func (t *testGraphDriver) CreateReadWrite(id, parent string, opts *graphdriver.CreateOpts) error {
 	return nil
 }
+
 func (t *testGraphDriver) Create(id, parent string, opts *graphdriver.CreateOpts) error {
 	return nil
 }
+
 func (t *testGraphDriver) Remove(id string) error {
 	return nil
 }
+
 func (t *testGraphDriver) Get(id, mountLabel string) (dir containerfs.ContainerFS, err error) {
 	return containerfs.NewLocalContainerFS(""), nil
 }
+
 func (t *testGraphDriver) Put(id string) error {
 	return nil
 }
+
 func (t *testGraphDriver) Exists(id string) bool {
 	return false
 }
+
 func (t *testGraphDriver) Status() [][2]string {
 	return nil
 }
+
 func (t *testGraphDriver) GetMetadata(id string) (map[string]string, error) {
 	return nil, nil
 }
+
 func (t *testGraphDriver) Cleanup() error {
 	return nil
 }
+
 func (t *testGraphDriver) Capabilities() graphdriver.Capabilities {
 	return graphdriver.Capabilities{}
 }

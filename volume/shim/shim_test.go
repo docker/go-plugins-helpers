@@ -11,8 +11,10 @@ import (
 	volumeplugin "github.com/docker/go-plugins-helpers/volume"
 )
 
-type testVolumeDriver struct{}
-type testVolume struct{}
+type (
+	testVolumeDriver struct{}
+	testVolume       struct{}
+)
 
 func (testVolume) Name() string           { return "" }
 func (testVolume) Path() string           { return "" }

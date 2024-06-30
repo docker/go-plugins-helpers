@@ -1,3 +1,4 @@
+//go:build (linux || freebsd) && !nosystemd
 // +build linux freebsd
 // +build !nosystemd
 

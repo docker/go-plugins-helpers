@@ -293,7 +293,6 @@ func (h *Handler) initMux() {
 			return
 		}
 		sdk.EncodeResponse(w, struct{}{}, false)
-
 	})
 	h.HandleFunc(getPath, func(w http.ResponseWriter, r *http.Request) {
 		req := GetRequest{}
