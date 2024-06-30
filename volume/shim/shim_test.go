@@ -11,16 +11,7 @@ import (
 	volumeplugin "github.com/docker/go-plugins-helpers/volume"
 )
 
-type (
-	testVolumeDriver struct{}
-	testVolume       struct{}
-)
-
-func (testVolume) Name() string           { return "" }
-func (testVolume) Path() string           { return "" }
-func (testVolume) Mount() (string, error) { return "", nil }
-func (testVolume) Unmount() error         { return nil }
-func (testVolume) DriverName() string     { return "" }
+type testVolumeDriver struct{}
 
 func (testVolumeDriver) Name() string                                            { return "" }
 func (testVolumeDriver) Create(string, map[string]string) (volume.Volume, error) { return nil, nil }
