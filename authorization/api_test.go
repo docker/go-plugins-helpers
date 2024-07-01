@@ -8,7 +8,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/big"
 	"net/http"
 	"os"
@@ -42,15 +42,13 @@ func (p *TestPlugin) AuthZRes(r Request) Response {
 
 func TestActivate(t *testing.T) {
 	response, err := http.Get("http://localhost:32456/Plugin.Activate")
-
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
-
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,15 +66,13 @@ func TestAuthZReq(t *testing.T) {
 		sdk.DefaultContentTypeV1_1,
 		strings.NewReader(request),
 	)
-
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
-
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,15 +103,13 @@ func TestAuthZRes(t *testing.T) {
 		sdk.DefaultContentTypeV1_1,
 		strings.NewReader(request),
 	)
-
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
-
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,14 +154,14 @@ func TestPeerCertificateMarshalJSON(t *testing.T) {
 	publickey := &privatekey.PublicKey
 
 	// create a self-signed certificate. template = parent
-	var parent = template
+	parent := template
 	raw, err := x509.CreateCertificate(rand.Reader, template, parent, publickey, privatekey)
 	require.NoError(t, err)
 
 	cert, err := x509.ParseCertificate(raw)
 	require.NoError(t, err)
 
-	var certs = []*x509.Certificate{cert}
+	certs := []*x509.Certificate{cert}
 	addr := "www.authz.com/auth"
 	req, err := http.NewRequest("GET", addr, nil)
 	require.NoError(t, err)
@@ -191,11 +185,9 @@ func TestPeerCertificateMarshalJSON(t *testing.T) {
 			require.Nil(t, err)
 			require.Equal(t, "Earth", pcObj.Subject.Country[0])
 			require.Equal(t, true, pcObj.IsCA)
-
 		})
 
 	}
-
 }
 
 func callURL(url string) {

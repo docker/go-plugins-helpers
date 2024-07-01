@@ -12,13 +12,6 @@ import (
 )
 
 type testVolumeDriver struct{}
-type testVolume struct{}
-
-func (testVolume) Name() string           { return "" }
-func (testVolume) Path() string           { return "" }
-func (testVolume) Mount() (string, error) { return "", nil }
-func (testVolume) Unmount() error         { return nil }
-func (testVolume) DriverName() string     { return "" }
 
 func (testVolumeDriver) Name() string                                            { return "" }
 func (testVolumeDriver) Create(string, map[string]string) (volume.Volume, error) { return nil, nil }
