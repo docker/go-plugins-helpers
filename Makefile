@@ -12,12 +12,11 @@ test-local: install-deps fmt lint vet
 	@go test -v ./...
 
 test:
-	@docker run -e GO111MODULE=off -v ${shell pwd}:/go/src/${PKG_NAME} -w /go/src/${PKG_NAME} ${IMAGE} make test-local
+	@docker run --rm -v ${shell pwd}:/go/src/${PKG_NAME} -w /go/src/${PKG_NAME} ${IMAGE} make test-local
 
 install-deps:
 	@echo "+ $@"
-	@go get -u golang.org/x/lint/golint
-	@go get -d -t ./...
+	@go install golang.org/x/lint/golint@latest
 
 lint:
 	@echo "+ $@"

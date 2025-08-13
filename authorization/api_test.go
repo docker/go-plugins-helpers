@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/docker/go-plugins-helpers/sdk"
-	"github.com/stretchr/testify/require"
 )
 
 type TestPlugin struct {
@@ -150,21 +149,29 @@ func TestPeerCertificateMarshalJSON(t *testing.T) {
 	}
 	// generate private key
 	privatekey, err := rsa.GenerateKey(rand.Reader, 2048)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 	publickey := &privatekey.PublicKey
 
 	// create a self-signed certificate. template = parent
 	parent := template
 	raw, err := x509.CreateCertificate(rand.Reader, template, parent, publickey, privatekey)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	cert, err := x509.ParseCertificate(raw)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	certs := []*x509.Certificate{cert}
 	addr := "www.authz.com/auth"
 	req, err := http.NewRequest("GET", addr, nil)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	req.RequestURI = addr
 	req.TLS = &tls.ConnectionState{}
@@ -176,15 +183,25 @@ func TestPeerCertificateMarshalJSON(t *testing.T) {
 
 		t.Run("Marshalling :", func(t *testing.T) {
 			raw, err = pcObj.MarshalJSON()
-			require.NotNil(t, raw)
-			require.Nil(t, err)
+			if raw == nil {
+				t.Fatalf("Failed to marshal peer certificate")
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
 		})
 
 		t.Run("UnMarshalling :", func(t *testing.T) {
 			err := pcObj.UnmarshalJSON(raw)
-			require.Nil(t, err)
-			require.Equal(t, "Earth", pcObj.Subject.Country[0])
-			require.Equal(t, true, pcObj.IsCA)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if expected := "Earth"; pcObj.Subject.Country[0] != expected {
+				t.Fatalf("Expected %s, got %s\n", expected, pcObj.Subject.Country[0])
+			}
+			if pcObj.IsCA != true {
+				t.Fatalf("Expected %t, got %t\n", true, pcObj.IsCA)
+			}
 		})
 
 	}
