@@ -26,7 +26,7 @@ func WindowsDefaultDaemonRootDir() string {
 func createPluginSpecDirWindows(name, address, daemonRoot string) (string, error) {
 	_, err := os.Stat(daemonRoot)
 	if os.IsNotExist(err) {
-		return "", fmt.Errorf("Deamon root directory must already exist: %s", err)
+		return "", fmt.Errorf("daemon root directory must already exist: %s", err)
 	}
 
 	pluginSpecDir := PluginSpecDir(daemonRoot)
