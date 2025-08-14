@@ -29,7 +29,12 @@ type Ipam interface {
 
 // CapabilitiesResponse returns whether or not this IPAM required pre-made MAC
 type CapabilitiesResponse struct {
+	// Whether on address request, libnetwork must
+	// specify the endpoint MAC address
 	RequiresMACAddress bool
+	// Whether of daemon start, libnetwork must replay the pool
+	// request and the address request for current local networks
+	RequiresRequestReplay bool
 }
 
 // AddressSpacesResponse returns the default local and global address space names for this IPAM
