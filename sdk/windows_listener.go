@@ -19,6 +19,9 @@ const (
 
 	// AllowServiceSystemAdmin grants full access permissions for Service, System, Administrator group and account.
 	AllowServiceSystemAdmin = "D:(A;ID;FA;;;SY)(A;ID;FA;;;BA)(A;ID;FA;;;LA)(A;ID;FA;;;LS)"
+
+	// AllowSystemOnly limits access to named pipe for NT AUTHORITY\SYSTEM only
+	AllowSystemOnly = "D:(A;;GA;;;SY)"
 )
 
 func newWindowsListener(address, pluginName, daemonRoot string, pipeConfig *WindowsPipeConfig) (net.Listener, string, error) {
