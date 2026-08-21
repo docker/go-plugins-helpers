@@ -32,7 +32,7 @@ func TestVolumeDriver(t *testing.T) {
 
 	resp, err := pluginRequest(client, "/VolumeDriver.Create", &volumeplugin.CreateRequest{Name: "foo"})
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatalf("%s", err.Error())
 	}
 
 	if resp.Err != "" {
